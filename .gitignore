@@ -29,3 +29,5 @@ Eski_Yedekler/
 media/
 benim_bert_modelim_3cls_v2/
 *.log
+
+!yapay_zeka_servisi/film_tfidf_3cls.pkl
