@@ -1,7 +1,10 @@
 ﻿Django>=5.0
 requests
 python-decouple
-torch
+
+-f https://download.pytorch.org/whl/torch_stable.html
+torch==2.2.2+cpu
+
 transformers
 scikit-learn
 joblib
@@ -9,6 +12,3 @@ numpy
 pandas
 gunicorn
 whitenoise
-fastapi
-uvicorn
-pydantic
