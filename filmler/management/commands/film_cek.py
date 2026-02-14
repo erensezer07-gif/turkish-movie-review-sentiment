@@ -21,7 +21,7 @@ class Command(BaseCommand):
         api_key = getattr(settings, "TMDB_API_KEY", "")
 
         if not api_key:
-            self.stderr.write(self.style.ERROR("❌ TMDB_API_KEY ayarlanmamış! .env dosyasını kontrol edin."))
+            self.stderr.write(self.style.ERROR("[HATA] TMDB_API_KEY ayarlanmamış! .env dosyasını kontrol edin."))
             return
 
         # 1. Tür Listesini (Genre Map) Çek
@@ -40,7 +40,7 @@ class Command(BaseCommand):
             return
 
         base_url = "https://api.themoviedb.org/3/movie/popular"
-        self.stdout.write(self.style.WARNING(f"🚀 {sayfa_sayisi} sayfa taranıyor... Türler güncellenecek."))
+        self.stdout.write(self.style.WARNING(f">>> {sayfa_sayisi} sayfa taranıyor... Türler güncellenecek."))
 
         def process_movie(film_data):
             film_id = film_data["id"]
@@ -127,11 +127,11 @@ class Command(BaseCommand):
                         Film.objects.update_or_create(isim=data['isim'], defaults=data['defaults'])
                         count += 1
 
-                self.stdout.write(f"  ✔ Sayfa {sayfa}/{sayfa_sayisi} tamamlandı.")
+                self.stdout.write(f"  [OK] Sayfa {sayfa}/{sayfa_sayisi} tamamlandı.")
             except requests.RequestException as e:
-                self.stderr.write(self.style.ERROR(f"  ✖ Sayfa {sayfa} hatası: {e}"))
+                self.stderr.write(self.style.ERROR(f"  [HATA] Sayfa {sayfa} hatası: {e}"))
 
             # Rate limiting — API sınırını aşmamak için
             time.sleep(0.25)
 
-        self.stdout.write(self.style.SUCCESS(f"\n🎉 Bitti! {count} film güncellendi/eklendi."))
+        self.stdout.write(self.style.SUCCESS(f"\n[TAMAM] Bitti! {count} film güncellendi/eklendi."))

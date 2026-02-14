@@ -1,18 +1,18 @@
 # 🎬 Sezer Film - AI Destekli Film Analiz Platformu
 
-**Direct Mode** mimarisiyle geliştirilmiş, hibrit yapay zeka (BERT + TF-IDF) destekli yeni nesil film analiz ve öneri platformu.
+**AI destekli, Türkçe film yorumları üzerinde hibrit duygu analizi yapan ve TMDB API ile zenginleştirilmiş modern bir film analiz platformu.**
 
 ## 🌐 Canlı Demo
 
-Projenin çalışan versiyonunu aşağıdaki linkten deneyebilirsiniz:
+Projeniz Render üzerinde yayınlandığında canlı demosu burada görünecektir.
 
-🔗 **[Sezer Film - AI Platformu](https://sezerfilm.onrender.com)**
+� **Deploy Etmek İçin:** Aşağıdaki "Render'da Yayınla" adımlarını takip ederek kendi linkinizi oluşturun.
 
-> ⚠️ **Teknik Not:** AI duygu analizi modeli, harici bir API yerine doğrudan Django uygulaması içinde (**Direct Mode**) çalışmaktadır. Sunucu uyku modundaysa (Cold Start), modelin belleğe yüklenmesi nedeniyle ilk analizde 15-20 saniyelik bir gecikme yaşanabilir. Sonraki analizler milisaniyeler sürer.
+*(Kurulum sonrası bu alanı kendi URL'niz ile güncelleyebilirsiniz: `https://proje-adiniz.onrender.com`)*
 
 ## ✨ Özellikler
 
--   **Direct AI Integration:** Direct Mode mimarisinde AI modelleri Django uygulaması içinde bellek üzerinde yüklenir ve inference işlemleri doğrudan Python katmanında gerçekleştirilir. Böylece harici API çağrıları ve ağ gecikmeleri ortadan kaldırılmıştır.
+-   **Direct AI Integration:** Direct Mode mimarisinde AI modelleri Django uygulaması içinde bellek üzerinde yüklenir ve inference işlemleri doğrudan Python katmanında gerçekleştirilir.
 -   **Veri Madenciliği:** TMDB API entegrasyonu ile binlerce film verisi ve posteri otomatik olarak çekilir.
 -   **Hibrit Duygu Analizi:** Yorumlar; Derin Öğrenme (BERT), Makine Öğrenmesi (TF-IDF) ve Kural Tabanlı sistemlerin ağırlıklı ortalaması ile analiz edilir.
 -   **Modern Arayüz:** Responsive tasarım, Netflix tarzı Hero Carousel ve dinamik ızgara (Grid) yapısı.
@@ -22,22 +22,21 @@ Projenin çalışan versiyonunu aşağıdaki linkten deneyebilirsiniz:
 
 Duygu analizi sistemi **3 sınıflı (Olumlu / Nötr / Olumsuz)** sınıflandırma yapacak şekilde eğitilmiştir.
 
-**Model Bileşenleri:**
-* **Fine-tuned BERT:** `dbmdz/bert-base-turkish-cased` modeli, Türkçe dil yapısını anlamak için fine-tune edilmiştir.
-* **TF-IDF + Logistic Regression:** Kelime frekansına dayalı klasik ML modeli, BERT'in gözden kaçırabileceği basit sinyalleri yakalar.
-* **Rule-Based Guardrails:** İroni ("Şaka yapıyorum"), spam ve anlamsız yorumları filtreleyen özel Python kuralları.
+**Model Künyesi:**
+* 📦 **Model Versiyonu:** `benim_bert_modelim_3cls_v2`
+* 🤖 **Mimari:** Fine-tuned BERT (`dbmdz/bert-base-turkish-cased`)
+* 📊 **Yardımcı Model:** TF-IDF + Logistic Regression
+* 🛡️ **Guardrails:** İroni, Spam ve Anlamsız Metin Filtresi
 
 🚀 **Veri Seti:** Model, **Beyazperde** ve diğer kaynaklardan toplanan **190.000+ satırlık** temizlenmiş Türkçe film yorum veri seti ile eğitilmiştir.
 
 ## 🔄 AI Analiz Akışı
 
-Kullanıcı bir yorum gönderdiğinde sistem şu adımları izler:
-
 1.  **Giriş:** Kullanıcı yorumu Django view katmanına ulaşır.
-2.  **Ön İşleme:** Metin temizlenir (noktalama, lower-case) ve Guardrail kontrolünden geçer (Spam/İroni).
+2.  **Ön İşleme:** Metin temizlenir (noktalama, lower-case) ve Guardrail kontrolünden geçer.
 3.  **Derin Analiz:** Fine-tuned BERT modeli metnin bağlamını (context) analiz eder.
 4.  **İstatistiksel Analiz:** TF-IDF modeli kelime köklerini ve frekanslarını değerlendirir.
-5.  **Karar (Ensemble):** Her iki modelin ve kuralların çıktıları ağırlıklı bir algoritma ile birleştirilerek nihai **Olumlu/Nötr/Olumsuz** kararı verilir.
+5.  **Karar (Ensemble):** Her iki modelin çıktıları ağırlıklı bir algoritma ile birleştirilerek nihai karar verilir.
 
 ## 🏗️ Proje Mimarisi (Direct Mode)
 
@@ -61,13 +60,14 @@ Bu projede mikroservis karmaşası yerine, performans ve yönetim kolaylığı i
 
 ## ☁️ Deployment
 
-Proje Render üzerinde tek bir web servisi olarak deploy edilmiştir. Uygulama başladığında AI modelleri (yaklaşık 500MB) belleğe yüklenir ve HTTP istekleri gelmeden sistem hazır hale gelir. Bu sayede harici bir işlemciye ihtiyaç duyulmaz.
+Proje Render üzerinde tek bir web servisi olarak deploy edilmiştir. Uygulama başlatıldığında AI modelleri (~450MB) belleğe **preload** edilir ve sonraki isteklerde **düşük gecikmeli (low-latency) inference** sağlanır. Bu mimari, soğuk başlangıç (cold-start) sonrası maksimum performans sunar.
 
 ## 🛠️ Teknolojiler
 
 | Katman | Teknoloji |
 | :--- | :--- |
 | Backend & AI | Django 6.0 + PyTorch |
+| MLOps | Model Versioning, Direct Inference Pipeline, Monolithic AI Integration |
 | NLP | Transformers (Hugging Face) + Scikit-learn |
 | Veritabanı | SQLite (Dev) / PostgreSQL (Prod) |
 | API | TMDB API v3 |
@@ -116,6 +116,7 @@ Tarayıcınızda `http://127.0.0.1:8000` adresine gidin. Model otomatik yüklene
 ```
 Ilk_AI_Projem/
 ├── filmler/                  # Django Uygulaması
+├── sinema_sitesi/            # Ana Proje Ayarları
 ├── yapay_zeka_servisi/       # AI Motoru (Direct Mode)
 │   ├── benim_bert_modelim_3cls_v2/
 │   ├── film_tfidf_3cls.pkl
@@ -141,16 +142,15 @@ print(analiz_yap("Bu film sinema tarihinin en iyisiydi."))
 # Çıktı: {'karar': 'Olumlu', 'skor': 0.98, ...}
 ```
 
-## 📸 Proje Ekran Görüntüleri
+## 📸 Proje Ekran Görüntüleri 
 
-*   🖥️ **Temel Kullanıcı Arayüzü**
-*   🏠 **Ana Sayfa ve Liste**
-*   🔐 **Kullanıcı Giriş**
-*   ⚙️ **Özellikler**
-*   🎬 **Film Detay**
-*   🛡️ **Spam/Guardrail Koruması**
-*   🧠 ⭐ **Öne Çıkan Özellik:** Gelişmiş AI Analiz Paneli
+*   🏠 **Ana Sayfa ve Liste**(![alt text](screenshots/anasayfa.png))
+*   🔐 **Kullanıcı Giriş**(![alt text](screenshots/giris.png))
+*   ⚙️ **Ai Yorum Algılama**(![alt text](screenshots/yorumlar.png))
+*   🎬 **Film Detay**(![alt text](screenshots/detay.png))
+*   🛡️ **Spam/Guardrail Koruması**(![alt text](screenshots/spam.png))
+*   🧠 **Ai Dashboard** (![alt text](screenshots/ai_dashboard.png))
 
 ## 📄 Lisans
 
-Bu proje eğitim amaçlı geliştirilmiştir.
+Bu proje **MIT Lisansı** ile lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakabilirsiniz.

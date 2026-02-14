@@ -78,7 +78,46 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "sinema_sitesi.wsgi.application"
 
-# ... (Database configs skip)
+# --------------------------------------------------------
+# VERİTABANI
+# --------------------------------------------------------
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    }
+}
+
+# --------------------------------------------------------
+# ŞİFRE DOĞRULAMA
+# --------------------------------------------------------
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
+
+# --------------------------------------------------------
+# API AYARLARI
+# --------------------------------------------------------
+TMDB_API_KEY = config("TMDB_API_KEY", default="")
+
+# ✅ YAPAY ZEKA SERVİSİ (Django -> FastAPI)
+# Modlar: 'direct' (Doğrudan çalıştır), 'api' (Harici servise istek at)
+AI_MODE = config("AI_MODE", default="direct")
+
+# Buraya /analiz yazma. Base URL olsun.
+AI_API_URL = "http://127.0.0.1:8001"
+AI_API_TIMEOUT = 10
+
+# --------------------------------------------------------
+# DİL VE ZAMAN
+# --------------------------------------------------------
+LANGUAGE_CODE = "tr-tr"
+TIME_ZONE = "Europe/Istanbul"
+USE_I18N = True
+USE_TZ = True
 
 # --------------------------------------------------------
 # STATİK DOSYALAR

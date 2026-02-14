@@ -13,7 +13,7 @@ urlpatterns = [
     path('register/', kayit_ol, name='register'),
     path('live-search/', live_search, name='live_search'),
 
-    # 🔒 Şifre Sıfırlama Adımları
+    # Sifre Sifirlama Adimlari
     path('accounts/password_reset/', auth_views.PasswordResetView.as_view(
         template_name='registration/password_reset_form.html',
         email_template_name='registration/password_reset_email.html',
@@ -32,6 +32,15 @@ urlpatterns = [
         template_name='registration/password_reset_complete.html'
     ), name='password_reset_complete'),
 
-    # Diğer hazır üyelik yolları (login, logout vb.)
+    # Diger hazir uyelik yollari (login, logout vb.)
     path('accounts/', include('django.contrib.auth.urls')),
 ]
+
+# --- PERFORMANCE FIX: Model Preloading ---
+# Sunucu ayaga kalkarken model bellege yuklensin (Cold Start Fix)
+try:
+    from sinema_sitesi.ai_client import get_ensemble_module
+    print(">>> AI Modeli onyukleniyor... (Cold Start Fix)")
+    get_ensemble_module()
+except Exception as e:
+    print(f"[HATA] Model onyukleme hatasi: {e}")
