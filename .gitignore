@@ -1,0 +1,31 @@
+# Ortam ve Gizli Dosyalar
+.env
+.venv/
+venv/
+*.pyc
+__pycache__/
+
+# Veritabanı
+db.sqlite3
+
+# IDE
+.idea/
+.vscode/
+
+# Model Dosyaları (Büyük)
+*.zip
+*.pkl
+benim_bert_modelim_3cls/
+
+# Ngrok
+ngrok.exe
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Backups & Large Files
+Eski_Yedekler/
+media/
+benim_bert_modelim_3cls_v2/
+*.log

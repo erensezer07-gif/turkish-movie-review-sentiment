@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-fullscreen">
+    <div class="auth-card">
+        <h2 class="text-warning fw-bold mb-4">YENİ HESAP OLUŞTUR</h2>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3 text-start">
+                    <label class="auth-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="text-danger d-block mt-1">{{ field.errors.0 }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-warning w-100 py-3 fw-bold mt-3 rounded-pill">KAYDI TAMAMLA</button>
+        </form>
+        <p class="mt-4 small text-white-50 text-center">Zaten hesabın var mı? <a href="{% url 'login' %}" class="text-warning fw-bold text-decoration-none">Giriş Yap</a></p>
+    </div>
+</div>
+{% endblock %}

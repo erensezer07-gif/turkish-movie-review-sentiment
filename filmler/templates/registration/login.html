@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="fullscreen-container">
+    <div class="fullscreen-bg"></div>
+    <div class="login-card-box">
+        <h1 class="brand-title">SEZER FILM</h1>
+        <p class="brand-subtitle">Sadece üyelere özel sinema dünyasına adım at.</p>
+
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="custom-input-group">
+                    <label class="custom-label">
+                        {% if field.name == 'username' %}Kullanıcı Adı
+                        {% elif field.name == 'password' %}Şifre
+                        {% else %}{{ field.label }}{% endif %}
+                    </label>
+                    <div class="custom-input-field">{{ field }}</div>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn-main mt-4">OTURUMU BAŞLAT</button>
+        </form>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'password_reset' %}" class="forgot-password-link">
+                <span>🔑</span> Şifremi Unuttum
+            </a>
+            <hr class="divider">
+            <p class="small text-white-50">Henüz üye değil misin?
+                <a href="{% url 'register' %}" class="text-warning fw-bold text-decoration-none ms-1">Hemen Kaydol</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 🎯 Milimetrik Hizalama ve Ortalama */
+    .fullscreen-container { height: 100vh; width: 100vw; display: flex; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; overflow: hidden; }
+    .fullscreen-bg { position: absolute; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1920') no-repeat center center; background-size: cover; z-index: -1; }
+
+    /* Kart Genişliği Artırıldı (Yazıların kaymaması için) */
+    .login-card-box { background: rgba(15, 15, 15, 0.92); backdrop-filter: blur(25px); padding: 3.5rem; border-radius: 2rem; border: 1px solid rgba(255, 255, 255, 0.1); width: 520px; text-align: center; margin-top: -5vh; }
+
+    .custom-input-group { display: flex; align-items: center; margin-bottom: 1.2rem; }
+    .custom-label { width: 140px; color: #f5c518; font-weight: bold; font-size: 0.9rem; text-align: left; flex-shrink: 0; }
+    .custom-input-field { flex-grow: 1; }
+    input { width: 100%; background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; padding: 10px 15px !important; border-radius: 10px !important; }
+
+    /* 💎 Estetik Link Tasarımı */
+    .forgot-password-link { color: rgba(255, 255, 255, 0.5); text-decoration: none; font-size: 0.85rem; padding: 8px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; display: inline-block; }
+    .forgot-password-link:hover { color: #f5c518; border-color: #f5c518; background: rgba(245, 197, 24, 0.05); transform: translateY(-2px); }
+
+    .brand-title { font-family: 'Montserrat', sans-serif; font-weight: 900; color: #f5c518; font-size: 2.8rem; margin-bottom: 0.5rem; }
+    .btn-main { background: #f5c518; color: black; border: none; width: 100%; padding: 14px; border-radius: 50px; font-weight: bold; transition: 0.3s; }
+    .btn-main:hover { background: #e2b616; transform: scale(1.02); }
+</style>
+{% endblock %}

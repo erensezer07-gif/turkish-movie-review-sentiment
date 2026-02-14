@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    /* --- GENERAL SETTINGS --- */
+    :root {
+        --card-bg: #1a1a1a;
+        --card-hover-bg: #252525;
+        --text-color: #e0e0e0;
+        --accent-color: #f5c518;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar-sticky {
+        position: sticky;
+        top: 2rem;
+    }
+
+    .list-group-item {
+        background-color: #1a1a1a;
+        border-color: #333;
+        color: #ccc;
+        transition: all 0.2s;
+    }
+
+    .list-group-item:hover {
+        background-color: #333;
+        color: #fff;
+        padding-left: 20px;
+        /* Slide effect */
+    }
+
+    .list-group-header {
+        color: var(--accent-color);
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    /* --- MODERN GRID LAYOUT (Updated Density) --- */
+    .category-section {
+        margin-bottom: 3rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid var(--accent-color);
+        padding-left: 15px;
+        text-transform: uppercase;
+    }
+
+    .modern-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        /* Optimized density */
+        gap: 20px;
+    }
+
+    .movie-card-modern {
+        background: transparent;
+        overflow: visible;
+        /* Prepare for hover lift */
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+
+    .movie-card-modern:hover {
+        transform: translateY(-5px);
+        z-index: 2;
+    }
+
+    .poster-wrapper {
+        position: relative;
+        border-radius: 8px;
+        /* Slightly round */
+        overflow: hidden;
+        aspect-ratio: 2/3;
+        /* Vertical poster */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .poster-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .movie-card-modern:hover .poster-wrapper img {
+        transform: scale(1.05);
+        /* Subtle zoom */
+        filter: brightness(0.4);
+        /* Darken for button visibility */
+    }
+
+    .rating-tag {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: var(--accent-color);
+        color: #000;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        z-index: 5;
+    }
+
+    /* Center Button on Poster */
+    .hover-actions {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .movie-card-modern:hover .hover-actions {
+        opacity: 1;
+    }
+
+    .btn-glow {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        border: 1px solid #fff;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-glow:hover {
+        background: #fff;
+        color: #000;
+        transform: scale(1.1);
+    }
+
+    .movie-info-below {
+        padding-top: 10px;
+    }
+
+    .movie-info-below h3 {
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0 0 3px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .movie-info-below p {
+        color: #999;
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    /* --- HERO REFINEMENT (TAM OTURT) --- */
+    .hero-bg-blur {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: blur(50px) brightness(0.2);
+        z-index: 1;
+        transform: scale(1.1);
+        /* Prevent white edges from blur */
+    }
+
+    .hero-content-wrapper {
+        position: relative;
+        z-index: 5;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        padding: 0 6%;
+    }
+
+    .hero-sharp-poster {
+        height: 85%;
+        max-height: 520px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 10;
+        transition: transform 0.3s ease;
+    }
+
+    .hero-sharp-poster:hover {
+        transform: scale(1.02);
+    }
+
+    @media (max-width: 991px) {
+        .hero-sharp-poster {
+            display: none;
+            /* Hide poster on mobile for text space */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- 2-COLUMN LAYOUT -->
+<div class="container-fluid pt-4" style="background-color: #141414;">
+    <div class="row">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="col-lg-2 col-md-3 d-none d-md-block">
+            <div class="sidebar-sticky">
+
+                <!-- Categories -->
+                <div class="mb-4">
+                    <div class="list-group-header"><i class="fa-solid fa-layer-group me-2"></i> KATEGORİLER</div>
+                    <div class="list-group list-group-flush rounded">
+                        <a href="{% url 'anasayfa' %}?mode=liste" class="list-group-item list-group-item-action">🔥 Tümü</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Aksiyon"
+                            class="list-group-item list-group-item-action">💥 Aksiyon</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Komedi" class="list-group-item list-group-item-action">😂 Komedi</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Korku" class="list-group-item list-group-item-action">👻 Korku</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Bilim-Kurgu"
+                            class="list-group-item list-group-item-action">🚀 Bilim Kurgu</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Macera" class="list-group-item list-group-item-action">🌍 Macera</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Dram" class="list-group-item list-group-item-action">🎭 Dram</a>
+                        <a href="{% url 'anasayfa' %}?kategori=Romantik"
+                            class="list-group-item list-group-item-action">❤️ Romantik</a>
+                    </div>
+                </div>
+
+                <!-- Sort -->
+                <div class="mb-4">
+                    <div class="list-group-header"><i class="fa-solid fa-sort me-2"></i> SIRALA</div>
+                    <div class="list-group list-group-flush rounded">
+                        <a href="{% url 'anasayfa' %}?sirala=puan" class="list-group-item list-group-item-action">⭐ En Yüksek Puan</a>
+                        <a href="{% url 'anasayfa' %}?sirala=yeni" class="list-group-item list-group-item-action">🆕 En Yeni Filmler</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {% if mode == 'dashboard' %}
+        <div class="col-lg-10 col-md-9">
+
+            {% if hero_movies %}
+            <!-- HERO CAROUSEL -->
+            <div id="heroCarousel" class="carousel slide mb-5 rounded-3 overflow-hidden shadow-lg position-relative"
+                data-bs-ride="carousel" style="height: 600px; background: #000;">
+
+                <div class="carousel-inner w-100 h-100">
+                    {% for movie in hero_movies %}
+                    <div class="carousel-item w-100 h-100 {% if forloop.first %}active{% endif %}"
+                        data-bs-interval="6000">
+
+                        <!-- Layer 1: Blurred Backdrop -->
+                        <img src="{{ movie.poster_url_hd|default:movie.poster_url }}" class="hero-bg-blur" alt="">
+
+                        <!-- Layer 2: Content Overlay -->
+                        <div class="hero-content-wrapper row g-0">
+                            <!-- Left: Text Info -->
+                            <div class="col-lg-7 d-flex flex-column justify-content-center text-white">
+                                <h1 class="display-3 fw-bold mb-3 text-uppercase"
+                                    style="font-family: 'Montserrat', sans-serif; text-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
+                                    {{ movie.isim }}
+                                </h1>
+
+                                <div class="mb-4 d-flex align-items-center gap-3">
+                                    <span class="badge bg-warning text-dark fs-5 fw-bold px-3 py-2">IMDb {{ movie.puan }}</span>
+                                    <span class="fs-4 fw-bold">{{ movie.yil }}</span>
+                                    <span class="border-start border-secondary ps-3 ms-1 fs-5 text-light opacity-75">{{ movie.turler }}</span>
+                                </div>
+
+                                <p class="lead mb-5 opacity-90"
+                                    style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 600px;">
+                                    {{ movie.konu }}
+                                </p>
+
+                                <div>
+                                    <a href="{% url 'film_detay' movie.id %}"
+                                        class="btn btn-light btn-lg px-5 py-3 fw-bold rounded-pill hover-scale shadow-lg">
+                                        <i class="fa-solid fa-circle-info me-2"></i> DAHA FAZLA
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Right: Sharp Poster (TAM OTURT) -->
+                            <div class="col-lg-5 d-none d-lg-flex justify-content-center align-items-center">
+                                <img src="{{ movie.poster_url_hd|default:movie.poster_url }}" class="hero-sharp-poster" style="object-fit: contain; max-width: 100%;"
+                                    alt="{{ movie.isim }}">
+                            </div>
+                        </div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Controls -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"
+                    style="z-index: 20; width: 4%;">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"
+                    style="z-index: 20; width: 4%;">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- POPULAR MOVIES -->
+            <section class="category-section">
+                <h2 class="section-title">🔥 Popüler Filmler</h2>
+                <div class="modern-grid">
+                    {% for film in popular %}
+                    <div class="movie-card-modern">
+                        <div class="poster-wrapper">
+                            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
+                            {% if film.puan > 0 %}
+                            <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
+                            {% endif %}
+                            <div class="hover-actions">
+                                <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
+                            </div>
+                        </div>
+                        <div class="movie-info-below">
+                            <h3>{{ film.isim }}</h3>
+                            <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- NEW ARRIVALS -->
+            <section class="category-section">
+                <h2 class="section-title">🆕 Yeni Eklenenler</h2>
+                <div class="modern-grid">
+                    {% for film in newest %}
+                    <div class="movie-card-modern">
+                        <div class="poster-wrapper">
+                            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
+                            {% if film.puan > 0 %}
+                            <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
+                            {% endif %}
+                            <div class="hover-actions">
+                                <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
+                            </div>
+                        </div>
+                        <div class="movie-info-below">
+                            <h3>{{ film.isim }}</h3>
+                            <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- CATEGORIES: ACTION -->
+            {% if action %}
+            <section class="category-section">
+                <h2 class="section-title">💥 Aksiyon</h2>
+                <div class="modern-grid">
+                    {% for film in action %}
+                    <div class="movie-card-modern">
+                        <div class="poster-wrapper">
+                            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
+                            {% if film.puan > 0 %}
+                            <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
+                            {% endif %}
+                            <div class="hover-actions">
+                                <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
+                            </div>
+                        </div>
+                        <div class="movie-info-below">
+                            <h3>{{ film.isim }}</h3>
+                            <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
+
+        </div> <!-- End Col-9 -->
+
+        {% else %}
+        <!-- SEARCH RESULTS -->
+        <div class="col-lg-10 col-md-9">
+            <h2 class="mb-4 text-white">
+                {% if q %} Arama Sonuçları: "{{ q }}"
+                {% elif secili_kategori %} Kategori: {{ secili_kategori }}
+                {% else %} Tüm Filmler {% endif %}
+            </h2>
+
+            <div class="modern-grid">
+                {% for film in filmler %}
+                <div class="movie-card-modern">
+                    <div class="poster-wrapper">
+                        <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
+                        {% if film.puan > 0 %}
+                        <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
+                        {% endif %}
+                        <div class="hover-actions">
+                            <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
+                        </div>
+                    </div>
+                    <div class="movie-info-below">
+                        <h3>{{ film.isim }}</h3>
+                        <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p class="text-white-50">Film bulunamadı.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div> <!-- End Row -->
+</div> <!-- End Container -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // NAVBAR TRANSPARENCY
+    window.addEventListener('scroll', function () {
+        const nav = document.querySelector('.navbar');
+        if (nav) {
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-dark', 'shadow-lg');
+                nav.classList.remove('bg-transparent');
+            } else {
+                nav.classList.add('bg-transparent');
+                nav.classList.remove('bg-dark', 'shadow-lg');
+            }
+        }
+    });
+</script>
+{% endblock %}

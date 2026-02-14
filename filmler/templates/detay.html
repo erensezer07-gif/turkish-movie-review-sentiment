@@ -1,0 +1,657 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ film.isim }} ({{ film.yil }}) — SEZER FILM{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* ==========================================
+       IMDb PRO TARZI FİLM DETAY SAYFASI
+       ========================================== */
+
+    /* --- HERO BÖLÜMÜ (BACKDROP + POSTER) --- */
+    .hero-section {
+        position: relative;
+        background-color: #000;
+        color: white;
+        padding: 40px 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 20px 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        min-height: 450px;
+        /* Video için min yükseklik */
+        transition: 0.3s;
+    }
+
+    .hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center top;
+        opacity: 0.3;
+        filter: blur(20px);
+        z-index: 1;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.95) 100%);
+        z-index: 2;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+    }
+
+    .hero-poster {
+        width: 280px;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-info {
+        flex: 1;
+        padding-top: 10px;
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #ccc;
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+
+    .hero-meta i {
+        color: #f5c518;
+        margin-right: 5px;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .btn-trailer {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-trailer:hover {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    /* --- OYUNCU KADROSU (YATAY SCROLL) --- */
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #f5c518;
+        margin-bottom: 15px;
+        padding-left: 10px;
+        border-left: 4px solid #f5c518;
+    }
+
+    .cast-scroller {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+        padding-bottom: 20px;
+        margin-bottom: 40px;
+        scrollbar-width: thin;
+        scrollbar-color: #444 #111;
+    }
+
+    .cast-scroller::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .cast-scroller::-webkit-scrollbar-thumb {
+        background: #444;
+        border-radius: 4px;
+    }
+
+    .cast-scroller::-webkit-scrollbar-track {
+        background: #111;
+    }
+
+    .cast-card {
+        min-width: 140px;
+        width: 140px;
+        background: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #333;
+        transition: transform 0.2s;
+    }
+
+    .cast-card:hover {
+        transform: translateY(-3px);
+        border-color: #555;
+    }
+
+    .cast-img {
+        width: 100%;
+        height: 175px;
+        object-fit: cover;
+        background: #222;
+    }
+
+    .cast-info {
+        padding: 10px;
+        text-align: center;
+    }
+
+    .cast-name {
+        font-weight: 700;
+        color: #fff;
+        font-size: 0.9rem;
+        margin-bottom: 3px;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .cast-role {
+        color: #888;
+        font-size: 0.8rem;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* --- İSTATİSTİKLER (DASHBOARD) --- */
+    .stats-dashboard {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .stat-card {
+        background: #151515;
+        border: 1px solid #2a2a2a;
+        padding: 15px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .stat-data h3 {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: white;
+    }
+
+    .stat-data p {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .icon-pos {
+        background: rgba(76, 175, 80, 0.15);
+        color: #4caf50;
+    }
+
+    .icon-neg {
+        background: rgba(244, 67, 54, 0.15);
+        color: #ef5350;
+    }
+
+    .icon-neu {
+        background: rgba(158, 158, 158, 0.15);
+        color: #bdbdbd;
+    }
+
+    /* --- YORUMLAR --- */
+    .reviews-box {
+        background: #141414;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #222;
+    }
+
+    .review-form textarea {
+        background: #0a0a0a;
+        border: 1px solid #333;
+        color: #eee;
+        padding: 15px;
+        border-radius: 8px;
+        width: 100%;
+        min-height: 80px;
+        transition: 0.3s;
+    }
+
+    .review-form textarea:focus {
+        border-color: #f5c518;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
+    }
+
+    .review-item {
+        padding: 20px 0;
+        border-bottom: 1px solid #222;
+        display: flex;
+        gap: 15px;
+    }
+
+    .rv-avatar {
+        width: 40px;
+        height: 40px;
+        background: #f5c518;
+        color: #000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.1rem;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 768px) {
+        .hero-content {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-poster {
+            width: 180px;
+        }
+
+        .hero-meta {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-actions {
+            justify-content: center;
+        }
+
+        .hero-title {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<div class="hero-section" id="heroSection">
+
+    <!-- Video Player (Gizli) -->
+    <div id="videoContainer"
+        style="display:none; position:relative; width:100%; height:100%; min-height:450px; background:#000;">
+        <iframe id="videoIframe" style="width:100%; height:450px; border:0;" allowfullscreen
+            allow="autoplay; encrypted-media"></iframe>
+        <button id="closeVideoBtn" class="btn btn-sm btn-danger shadow"
+            style="position:absolute; top:20px; right:20px; z-index:100;">
+            <i class="fa-solid fa-times"></i> Kapat
+        </button>
+    </div>
+
+    <!-- Orijinal İçerik -->
+    <div id="heroContentWrapper">
+        {% if backdrop_url %}
+        <div class="hero-bg" style="background-image: url('{{ backdrop_url }}');"></div>
+        {% endif %}
+        <div class="hero-overlay"></div>
+
+        <div class="container hero-content">
+            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" class="hero-poster">
+
+            <div class="hero-info">
+                <h1 class="hero-title">{{ film.isim }}</h1>
+
+                <div class="hero-meta">
+                    <span>{{ film.yil }}</span>
+                    <span>•</span>
+                    <span>{{ runtime_minutes|default:"-" }} dk</span>
+                    <span>•</span>
+                    <span>{{ genres_text|default:"Tür Bilgisi Yok" }}</span>
+                    <span>•</span>
+
+                    <!-- PUAN GÖSTERİMİ -->
+                    {% if film.puan and film.puan > 0 %}
+                    <span><i class="fa-solid fa-star"></i> {{ film.puan }} / 10</span>
+                    {% else %}
+                    <span class="text-secondary"><i class="fa-regular fa-calendar"></i> Henüz Yayınlanmadı</span>
+                    {% endif %}
+                </div>
+
+                <p style="color: #ddd; line-height: 1.6; max-width: 700px;">
+                    {{ film.konu|default:"Film konusu henüz eklenmemiş." }}
+                </p>
+
+                <div class="hero-actions">
+                    {% load youtube_filters %}
+                    {% if trailer_watch_url %}
+                    <!-- Butona tıklandığında Inline Oynatıcı çalışacak -->
+                    <button type="button" class="btn-trailer" id="playTrailerBtn"
+                        data-url="{{ trailer_watch_url|convert_to_embed }}">
+                        <i class="fa-solid fa-play"></i> Fragmanı İzle
+                    </button>
+                    {% else %}
+                    <span class="text-secondary small">Fragman yok</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ANKET & KADRO -->
+<div class="row">
+    <!-- SOL KOLON (Kadro, Bilgiler) -->
+    <div class="col-lg-8">
+
+        <!-- OYUNCULAR -->
+        <h3 class="section-title">Oyuncular</h3>
+        {% if cast_list %}
+        <div class="cast-scroller">
+            {% for actor in cast_list %}
+            <div class="cast-card">
+                <img src="{{ actor.photo|default:'https://via.placeholder.com/138x175/333/fff?text=?' }}"
+                    alt="{{ actor.name }}" class="cast-img">
+                <div class="cast-info">
+                    <span class="cast-name" title="{{ actor.name }}">{{ actor.name }}</span>
+                    <span class="cast-role" title="{{ actor.character }}">{{ actor.character }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-secondary mb-4">Oyuncu bilgisi bulunamadı.</p>
+        {% endif %}
+
+        <!-- YORUMLAR -->
+        <h3 class="section-title">Kullanıcı Yorumları</h3>
+        <div class="reviews-box">
+            <!-- Filtreler -->
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-sm btn-dark border-secondary fbtn active" data-filter="all">Tümü</button>
+                <button class="btn btn-sm btn-dark border-secondary fbtn" data-filter="pos">👍 Olumlu</button>
+                <button class="btn btn-sm btn-dark border-secondary fbtn" data-filter="neg">👎 Olumsuz</button>
+            </div>
+
+            <!-- Yorum Formu -->
+            {% if film.puan and film.puan > 0 %}
+            <form id="reviewForm" class="review-form mb-4">
+                {% csrf_token %}
+                <textarea id="reviewText" name="yorum_icerigi"
+                    placeholder="Bu film hakkında ne düşünüyorsunuz? (En az 3 kelime)" required></textarea>
+                <div class="d-flex justify-content-end mt-2">
+                    <button type="submit" id="reviewBtn" class="btn btn-warning fw-bold">Yorum Gönder</button>
+                </div>
+            </form>
+            {% else %}
+            <div class="alert text-center mb-4"
+                style="background: rgba(245, 197, 24, 0.1); border: 1px solid #f5c518; color: #f5c518; border-radius: 10px; padding: 15px;">
+                <i class="fa-solid fa-clock"></i> <strong>Bu film henüz vizyona girmediği için yorumlara
+                    kapalıdır.</strong>
+            </div>
+            {% endif %}
+
+            <div id="toast"
+                style="display:none; padding:10px; border-radius:5px; margin-bottom:10px; text-align:center;"></div>
+
+            <!-- Yorum Listesi -->
+            <div id="reviewsList">
+                {% for yorum in yorumlar %}
+                <div class="review-item d-flex gap-3 mb-3 p-3 rounded border border-secondary"
+                    data-sentiment="{{ yorum.ai_karari }}" style="background-color: #111 !important; color: #fff;">
+
+                    <div class="user-avatar d-flex align-items-center justify-content-center rounded-circle bg-warning text-dark fw-bold"
+                        style="width: 50px; height: 50px; font-size: 1.2rem; flex-shrink: 0;">
+                        {{ yorum.kullanici_adi|slice:":1"|upper }}
+                    </div>
+
+                    <div class="w-100">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-white">{{ yorum.kullanici_adi }}</strong>
+                            <small class="text-secondary">{{ yorum.tarih|date:"d M Y" }}</small>
+                        </div>
+
+                        <div class="mb-2">
+                            {% if yorum.ai_karari == 'OLUMLU' %}
+                            <span class="badge bg-success text-white px-3 py-2 rounded-pill">Olumlu</span>
+                            {% elif yorum.ai_karari == 'OLUMSUZ' %}
+                            <span class="badge bg-danger text-white px-3 py-2 rounded-pill">Olumsuz</span>
+                            {% else %}
+                            <span class="badge bg-secondary text-white px-3 py-2 rounded-pill">Nötr</span>
+                            {% endif %}
+                        </div>
+
+                        <p class="m-0" style="color: #eee; font-size:0.95rem; line-height: 1.5;">{{ yorum.icerik }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p id="emptyMsg" class="text-center text-secondary py-3">Henüz yorum yok. İlk sen yaz! 🚀</p>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- SAĞ KOLON (İstatistikler) -->
+    <div class="col-lg-4">
+        <h3 class="section-title">AI Analizi</h3>
+        <div class="stats-dashboard">
+            <div class="stat-card">
+                <div class="stat-icon icon-pos"><i class="fa-solid fa-thumbs-up"></i></div>
+                <div class="stat-data">
+                    <h3 id="stat-pos">{{ stats.pos }}</h3>
+                    <p>OLUMLU</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-neg"><i class="fa-solid fa-thumbs-down"></i></div>
+                <div class="stat-data">
+                    <h3 id="stat-neg">{{ stats.neg }}</h3>
+                    <p>OLUMSUZ</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon icon-neu"><i class="fa-solid fa-scale-balanced"></i></div>
+                <div class="stat-data">
+                    <h3 id="stat-neu">{{ stats.neu }}</h3>
+                    <p>NÖTR</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-dark p-3 rounded border border-secondary mt-3">
+            <h6 class="text-white mb-2"><i class="fa-solid fa-circle-info text-warning"></i> Nasıl Çalışır?</h6>
+            <p class="small text-secondary m-0">
+                Yapay zeka (AI) yorumları analiz ederek filmin genel duygu durumunu çıkarır. Argo veya anlamsız yorumlar
+                otomatik olarak filtrelenir.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // --- FRAGMAN OYNATICI ---
+    const playBtn = document.getElementById('playTrailerBtn');
+    const videoContainer = document.getElementById('videoContainer');
+    const heroContent = document.getElementById('heroContentWrapper');
+    const iframe = document.getElementById('videoIframe');
+    const closeBtn = document.getElementById('closeVideoBtn');
+    const heroSection = document.getElementById('heroSection');
+
+    if (playBtn && videoContainer) {
+        playBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const url = playBtn.getAttribute('data-url');
+            if (url) {
+                iframe.src = url;
+                // Geçiş efekti
+                heroContent.style.opacity = '0';
+                setTimeout(() => {
+                    heroContent.style.display = 'none';
+                    videoContainer.style.display = 'block';
+                    videoContainer.style.opacity = '1';
+                }, 200);
+            }
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            iframe.src = ''; // Videoyu durdur
+            videoContainer.style.display = 'none';
+            heroContent.style.display = 'block';
+            setTimeout(() => { heroContent.style.opacity = '1'; }, 50);
+        });
+    }
+
+    // --- FİLTRELEME & DİĞERLERİ ---
+    const btns = document.querySelectorAll('.fbtn');
+    btns.forEach(b => {
+        b.addEventListener('click', () => {
+            btns.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            const f = b.getAttribute('data-filter');
+            document.querySelectorAll('.review-item').forEach(item => {
+                item.style.display = (f === 'all' || item.getAttribute('data-sentiment') === f) ? 'flex' : 'none';
+            });
+        });
+    });
+
+    // TOAST
+    function showToast(msg, type) {
+        const t = document.getElementById('toast');
+        t.innerHTML = msg;
+        t.style.display = 'block';
+        t.style.backgroundColor = type === 'error' ? '#3e1a1a' : '#1a3e1a';
+        t.style.color = type === 'error' ? '#ff8888' : '#88ff88';
+        t.style.border = type === 'error' ? '1px solid #ff4444' : '1px solid #44ff44';
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    // AJAX POST
+    const form = document.getElementById('reviewForm');
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('reviewBtn');
+            const txt = document.getElementById('reviewText');
+
+            if (txt.value.trim().length < 3) { showToast('Yorum en az 3 karakter olmalı.', 'error'); return; }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gönderiliyor...';
+
+            try {
+                const fd = new FormData(form);
+                const res = await fetch(window.location.href, {
+                    method: 'POST',
+                    body: fd,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = await res.json();
+
+                if (!data.ok) {
+                    showToast(data.error || 'Hata oluştu', 'error');
+                } else {
+                    showToast('✅ Yorumunuz eklendi!', 'success');
+
+                    const y = data.yorum;
+                    const html = `
+                    <div class="review-item d-flex gap-3 mb-3 p-3 rounded border border-secondary"
+                         data-sentiment="${y.ai_karari}"
+                         style="background-color: #111 !important; color: #fff;">
+                        <div class="user-avatar d-flex align-items-center justify-content-center rounded-circle bg-warning text-dark fw-bold"
+                             style="width: 50px; height: 50px; font-size: 1.2rem; flex-shrink: 0;">
+                            ${y.avatar}
+                        </div>
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-white">${y.kullanici}</strong>
+                                <small class="text-secondary">${y.tarih}</small>
+                            </div>
+                            <div class="mb-2">
+                                <span class="${y.badge_cls} px-3 py-2 rounded-pill">${y.badge_text}</span>
+                            </div>
+                            <p class="m-0" style="color: #eee; font-size:0.95rem; line-height: 1.5;">${y.icerik}</p>
+                        </div>
+                    </div>`;
+
+                    document.getElementById('reviewsList').insertAdjacentHTML('afterbegin', html);
+                    const empty = document.getElementById('emptyMsg');
+                    if (empty) empty.remove();
+
+                    document.getElementById('stat-pos').innerText = data.stats.pos;
+                    document.getElementById('stat-neg').innerText = data.stats.neg;
+                    document.getElementById('stat-neu').innerText = data.stats.neu;
+
+                    txt.value = '';
+                }
+
+            } catch (err) {
+                console.error(err);
+                showToast('Sunucu hatası.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Yorum Gönder';
+            }
+        });
+    }
+</script>
+{% endblock %}
