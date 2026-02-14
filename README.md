@@ -1,22 +1,25 @@
 # 🎬 Sezer Film - AI Destekli Film Analiz Platformu
+### Turkish Movie Review Sentiment Analysis with BERT + TF-IDF Ensemble
 
 **AI destekli, Türkçe film yorumları üzerinde hibrit duygu analizi yapan ve TMDB API ile zenginleştirilmiş modern bir film analiz platformu.**
 
 ## 🌐 Canlı Demo
 
-Projeniz Render üzerinde yayınlandığında canlı demosu burada görünecektir.
+## 🌐 Canlı Demo
 
-� **Deploy Etmek İçin:** Aşağıdaki "Render'da Yayınla" adımlarını takip ederek kendi linkinizi oluşturun.
+🔗 **Demo:** https://sezerfilm-ai.onrender.com
+*(Deploy sonrası aktif olacaktır.)*
 
-*(Kurulum sonrası bu alanı kendi URL'niz ile güncelleyebilirsiniz: `https://proje-adiniz.onrender.com`)*
+> ⚠️ **Teknik Not:** AI duygu analizi modeli, harici bir API yerine doğrudan Django uygulaması içinde (**Direct Mode**) çalışmaktadır. Sunucu uyku modundaysa (Cold Start), modelin belleğe yüklenmesi nedeniyle ilk analizde 10-15 saniyelik bir gecikme yaşanabilir. Sonraki analizler milisaniyeler sürer.
+
 
 ## ✨ Özellikler
 
--   **Direct AI Integration:** Direct Mode mimarisinde AI modelleri Django uygulaması içinde bellek üzerinde yüklenir ve inference işlemleri doğrudan Python katmanında gerçekleştirilir.
--   **Veri Madenciliği:** TMDB API entegrasyonu ile binlerce film verisi ve posteri otomatik olarak çekilir.
--   **Hibrit Duygu Analizi:** Yorumlar; Derin Öğrenme (BERT), Makine Öğrenmesi (TF-IDF) ve Kural Tabanlı sistemlerin ağırlıklı ortalaması ile analiz edilir.
--   **Modern Arayüz:** Responsive tasarım, Netflix tarzı Hero Carousel ve dinamik ızgara (Grid) yapısı.
--   **Güvenlik:** `.env` yönetimi ve CSRF korumaları.
+- **🚀 Direct AI Integration:** Direct Mode mimarisinde AI modelleri Django uygulaması içinde bellek üzerinde yüklenir ve inference işlemleri doğrudan Python katmanında gerçekleştirilir.
+- **🕷️ Veri Madenciliği:** TMDB API entegrasyonu ile binlerce film verisi ve posteri otomatik olarak çekilir.
+- **🧠 Hibrit Duygu Analizi:** Yorumlar; Derin Öğrenme (BERT), Makine Öğrenmesi (TF-IDF) ve Kural Tabanlı sistemlerin ağırlıklı ortalaması ile analiz edilir.
+- **🎨 Modern Arayüz:** Responsive tasarım, Netflix tarzı Hero Carousel ve dinamik ızgara (Grid) yapısı.
+- **🔒 Güvenlik:** `.env` yönetimi ve CSRF korumaları.
 
 ## 🧠 Kullanılan AI Modeli
 
@@ -32,15 +35,30 @@ Duygu analizi sistemi **3 sınıflı (Olumlu / Nötr / Olumsuz)** sınıflandır
 
 ## 🔄 AI Analiz Akışı
 
-1.  **Giriş:** Kullanıcı yorumu Django view katmanına ulaşır.
-2.  **Ön İşleme:** Metin temizlenir (noktalama, lower-case) ve Guardrail kontrolünden geçer.
-3.  **Derin Analiz:** Fine-tuned BERT modeli metnin bağlamını (context) analiz eder.
-4.  **İstatistiksel Analiz:** TF-IDF modeli kelime köklerini ve frekanslarını değerlendirir.
-5.  **Karar (Ensemble):** Her iki modelin çıktıları ağırlıklı bir algoritma ile birleştirilerek nihai karar verilir.
+1. **Giriş:** Kullanıcı yorumu Django view katmanına ulaşır.
+2. **Ön İşleme:** Metin temizlenir (noktalama, lower-case) ve Guardrail kontrolünden geçer.
+3. **Derin Analiz:** Fine-tuned BERT modeli metnin bağlamını (context) analiz eder.
+4. **İstatistiksel Analiz:** TF-IDF modeli kelime köklerini ve frekanslarını değerlendirir.
+5. **Karar (Ensemble):** Her iki modelin çıktıları ağırlıklı bir algoritma ile birleştirilerek nihai karar verilir.
 
 ## 🏗️ Proje Mimarisi (Direct Mode)
 
 Bu projede mikroservis karmaşası yerine, performans ve yönetim kolaylığı için **Monolithic AI** yaklaşımı benimsenmiştir.
+
+```mermaid
+graph TD
+    User[Kullanıcı] -->|HTTP Request| Django[Django Web App]
+    Django -->|Veri Çekme| TMDB[TMDB API]
+    subgraph "AI Engine (In-Memory)"
+        Django -->|Metin| Preprocess[Ön İşleme]
+        Preprocess --> BERT[BERT Model]
+        Preprocess --> TFIDF[TF-IDF Model]
+        BERT --> Ensemble[Ağırlıklı Karar]
+        TFIDF --> Ensemble
+    end
+    Ensemble -->|Sonuç: Olumlu/Olumsuz| Django
+```
+
 
 ```text
 ┌──────────────────────────┐
@@ -58,99 +76,62 @@ Bu projede mikroservis karmaşası yerine, performans ve yönetim kolaylığı i
 └──────────────────────────┘
 ```
 
-## ☁️ Deployment
+## 📸 Ekran Görüntüleri
 
-Proje Render üzerinde tek bir web servisi olarak deploy edilmiştir. Uygulama başlatıldığında AI modelleri (~450MB) belleğe **preload** edilir ve sonraki isteklerde **düşük gecikmeli (low-latency) inference** sağlanır. Bu mimari, soğuk başlangıç (cold-start) sonrası maksimum performans sunar.
+Projenin arayüzünden bazı kareler:
 
-## 🛠️ Teknolojiler
 
-| Katman | Teknoloji |
-| :--- | :--- |
-| Backend & AI | Django 6.0 + PyTorch |
-| MLOps | Model Versioning, Direct Inference Pipeline, Monolithic AI Integration |
-| NLP | Transformers (Hugging Face) + Scikit-learn |
-| Veritabanı | SQLite (Dev) / PostgreSQL (Prod) |
-| API | TMDB API v3 |
-| Frontend | HTML5 / CSS3 / Bootstrap 5 |
+| Ana Sayfa | Film Detay |
+|-----------|------------|
+| ![Ana Sayfa](screenshots/anasayfa.png) | ![Detay](screenshots/detay.png) |
 
-## 🚀 Kurulum ve Çalıştırma
+| Kullanıcı Giriş | Yorumlar & Analiz |
+|-----------------|-------------------|
+| ![Giriş](screenshots/giris.png) | ![Yorumlar](screenshots/yorumlar.png) |
 
-### 1. Projeyi Klonlayın
+| AI Analiz Dashboard | Spam Koruması |
+|---------------------|---------------|
+| ![AI Dashboard](screenshots/ai_dashboard.png) | ![Spam](screenshots/spam.png) |
 
-```bash
-git clone https://github.com/KULLANICI_ADINIZ/Ilk_AI_Projem.git
-cd Ilk_AI_Projem
-```
+## 🛠️ Kurulum (Local Development)
 
-### 2. Sanal Ortam ve Bağımlılıklar
+Projeyi kendi bilgisayarınızda çalıştırmak için:
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate      # Windows
-# source .venv/bin/activate # Mac/Linux
+1. **Repoyu klonlayın:**
+   ```bash
+   git clone https://github.com/erensezer07-gif/turkish-movie-review-sentiment.git
+   cd turkish-movie-review-sentiment
+   ```
 
-pip install -r requirements.txt
-```
+2. **Sanal ortamı kurun:**
+   ```bash
+   python -m venv .venv
+   # Windows:
+   .venv\Scripts\activate
+   # Mac/Linux:
+   source .venv/bin/activate
+   ```
 
-### 3. Ortam Değişkenleri (.env)
+3. **Bağımlılıkları yükleyin:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Proje kök dizininde `.env` dosyası oluşturun:
+4. **Ortam değişkenlerini (.env) ayarlayın:**
+   Projeyi çalıştırmak için `.env` dosyası oluşturun:
+   ```ini
+   SECRET_KEY=gizli_anahtariniz
+   DEBUG=True
+   TMDB_API_KEY=tmdb_api_key_buraya
+   ```
 
-```ini
-SECRET_KEY=gizli-anahtariniz
-DEBUG=True
-TMDB_API_KEY=tmdb_api_key_buraya
-```
+5. **Veritabanını başlatın ve çalıştırın:**
+   ```bash
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-### 4. Uygulamayı Başlatın
+## 👨‍💻 Geliştirici
 
-```bash
-python manage.py migrate
-python manage.py runserver
-```
-
-Tarayıcınızda `http://127.0.0.1:8000` adresine gidin. Model otomatik yüklenecektir.
-
-## 📁 Proje Yapısı
-
-```
-Ilk_AI_Projem/
-├── filmler/                  # Django Uygulaması
-├── sinema_sitesi/            # Ana Proje Ayarları
-├── yapay_zeka_servisi/       # AI Motoru (Direct Mode)
-│   ├── benim_bert_modelim_3cls_v2/
-│   ├── film_tfidf_3cls.pkl
-│   └── app_ensemble.py       # Analiz Mantığı
-├── screenshots/              # Görseller
-├── manage.py
-└── README.md
-```
-
-## 🧪 AI Analiz Testi (Django Shell)
-
-Terminalden manuel test için:
-
-```bash
-python manage.py shell
-```
-
-```python
-from sinema_sitesi.ai_client import analiz_yap
-
-# Test
-print(analiz_yap("Bu film sinema tarihinin en iyisiydi."))
-# Çıktı: {'karar': 'Olumlu', 'skor': 0.98, ...}
-```
-
-## 📸 Proje Ekran Görüntüleri 
-
-*   🏠 **Ana Sayfa ve Liste**(![alt text](screenshots/anasayfa.png))
-*   🔐 **Kullanıcı Giriş**(![alt text](screenshots/giris.png))
-*   ⚙️ **Ai Yorum Algılama**(![alt text](screenshots/yorumlar.png))
-*   🎬 **Film Detay**(![alt text](screenshots/detay.png))
-*   🛡️ **Spam/Guardrail Koruması**(![alt text](screenshots/spam.png))
-*   🧠 **Ai Dashboard** (![alt text](screenshots/ai_dashboard.png))
-
-## 📄 Lisans
-
-Bu proje **MIT Lisansı** ile lisanslanmıştır. Detaylar için [LICENSE](LICENSE) dosyasına bakabilirsiniz.
+**Eren Sezer**
+Computer Engineering Student | AI & NLP Enthusiast
