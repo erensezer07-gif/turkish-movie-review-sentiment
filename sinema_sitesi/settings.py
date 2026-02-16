@@ -21,15 +21,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # GÜVENLİK
 # --------------------------------------------------------
 SECRET_KEY = config("SECRET_KEY")
-DEBUG = config("DEBUG", default=True, cast=bool)
-ALLOWED_HOSTS = ["*"]
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-# Ngrok adresine güvenmesi için:
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.ngrok-free.app",
-    "https://*.ngrok.io",
-    "https://*.ngrok-free.dev",
-]
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost").split(",")
+
+# Ngrok ve Render adreslerine güvenmesi için:
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://*.ngrok-free.app,https://*.ngrok.io,https://*.ngrok-free.dev"
+).split(",")
+
+# Render.com deploy domain'ini otomatik ekle
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
 # --------------------------------------------------------
 # UYGULAMA TANIMLARI
