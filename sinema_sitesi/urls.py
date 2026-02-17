@@ -1,9 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from filmler.views import anasayfa, film_detay, toplu_film_ekle, kayit_ol
-from filmler.forms import UserLoginForm
-from filmler.views import live_search
+from filmler.views import anasayfa, film_detay, toplu_film_ekle, kayit_ol, live_search
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,11 +34,3 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
 ]
 
-# --- PERFORMANCE FIX: Model Preloading ---
-# Sunucu ayaga kalkarken model bellege yuklensin (Cold Start Fix)
-try:
-    from sinema_sitesi.ai_client import get_ensemble_module
-    print(">>> AI Modeli onyukleniyor... (Cold Start Fix)")
-    get_ensemble_module()
-except Exception as e:
-    print(f"[HATA] Model onyukleme hatasi: {e}")

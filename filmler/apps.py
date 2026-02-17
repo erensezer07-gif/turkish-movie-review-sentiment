@@ -14,15 +14,41 @@ class FilmlerConfig(AppConfig):
         # Uygulama ayağa kalktığında modeli arka planda yükle (Warmup)
         # Bu sayede ilk istekte bekleme süresi azalır.
         
-        # Sadece runserver veya production server çalışırken yapmalı,
-        # migrate vs. komutlarında gereksiz yüklemeyi önlemek için kontrol eklenebilir.
-        # Basitlik adına threading ile exception handling ekleyerek çağırıyoruz.
+        # 1. Kontrollü Preload (Warmup)
+        # Yönetim komutlari (migrate, makemigrations, shell, check vb.) calisirken
+        # modelin yuklenmesini engelliyoruz.
         
+        import sys
+        import os
+
+        # Hangi komutlarda preload iptal edilecek?
+        SKIP_COMMANDS = {
+            'migrate', 'makemigrations', 'collectstatic',
+            'test', 'check', 'shell', 'dbshell', 'flush',
+            'showmigrations', 'sqlmigrate'
+        }
+        
+        # sys.argv[1] genelde komut ismidir (manage.py runserver ...)
+        # Ancak production'da (gunicorn/uvicorn) sys.argv farklı olabilir.
+        if len(sys.argv) > 1:
+            command = sys.argv[1]
+            if command in SKIP_COMMANDS:
+                logger.info(f"AI Warmup SKIPPED (Command: {command})")
+                return
+
+        # 2. Env Var ile Kontrol (ENABLE_AI_WARMUP=False ise yapma)
+        # Default: True (Production'da workers icin)
+        enable_warmup = os.environ.get("ENABLE_AI_WARMUP", "True").lower() in ("true", "1", "yes")
+        if not enable_warmup:
+            logger.info("AI Warmup DISABLED via environment variable.")
+            return
+
         def warmup():
             # Döngüsel importu önlemek için içeride import
             try:
                 # 2 saniye bekle ki Django tamamen yüklensin
                 time.sleep(2)
+                logger.info("AI Warmup Triggering...")
                 from sinema_sitesi.ai_client import load_model
                 load_model()
             except Exception as e:

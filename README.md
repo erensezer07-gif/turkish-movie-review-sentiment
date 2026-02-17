@@ -127,9 +127,54 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
 
 5. **Veritabanını başlatın ve çalıştırın:**
    ```bash
-   python manage.py migrate
    python manage.py runserver
    ```
+
+## 📦 Dependency Yönetimi
+
+Bu projede bağımlılıklar standartlaştırılmıştır ve **pip-tools** ile yönetilmektedir.
+
+### 1. Kurulum Standardı (Local / CI / Prod)
+Tüm ortamlar için tek geçerli kurulum komutu şudur:
+```bash
+pip install -r requirements.txt
+```
+> ⚠️ **UYARI:** `requirements.txt` dosyası asla elle düzenlenmemelidir. Bu dosya otomatize bir süreçle kilitlenmiştir (pinned & hashed).
+
+### 2. Paket Ekleme/Çıkarma
+Yeni bir paket eklemek veya çıkarmak için:
+1. `requirements.in` dosyasını düzenleyin.
+2. Lock dosyasını güncelleyin:
+   ```bash
+   pip-compile --generate-hashes requirements.in -o requirements.txt
+   ```
+3. Değişiklikleri yükleyin:
+   ```bash
+   pip-sync
+   # veya
+   pip install -r requirements.txt
+   ```
+
+### 3. Güncelleme Politikası (Routine Bump)
+Bağımlılıklar **aylık veya 2 aylık periyotlarla** güncellenmelidir.
+
+**Örnek Güncelleme Komutları:**
+```bash
+# Tüm paketleri güvenli aralıkta güncelle
+pip-compile --upgrade requirements.in -o requirements.txt
+
+# Sadece belirli bir paketi güncelle (Ör: Django)
+pip-compile --upgrade-package django --generate-hashes requirements.in -o requirements.txt
+
+# Birden fazla paketi güncelle
+pip-compile --upgrade-package transformers --upgrade-package torch --generate-hashes requirements.in -o requirements.txt
+```
+
+### 4. Doğrulama (CI Check)
+Her güncelleme sonrası mutlaka testler çalıştırılmalıdır:
+```bash
+python manage.py test
+```
 
 ## 👨‍💻 Geliştirici
 

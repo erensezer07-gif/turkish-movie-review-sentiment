@@ -1,0 +1,16 @@
+# Framework
+Django>=6.0,<7.0
+python-decouple
+requests
+gunicorn
+whitenoise
+
+# Data Science & AI
+# Torch CPU version
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch>=2.10.0
+transformers
+scikit-learn
+joblib
+numpy
+pandas

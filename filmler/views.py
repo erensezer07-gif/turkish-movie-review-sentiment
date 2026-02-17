@@ -1,6 +1,6 @@
 import logging
 import random
-from datetime import datetime
+
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -13,37 +13,36 @@ from .forms import UserRegisterForm
 from .models import Film, Yorum
 
 # Services
-from .services.moderation_service import kufur_kontrol, anlamsiz_mi, tr_lower
+from .services.moderation_service import kufur_kontrol, anlamsiz_mi
 from .services.sentiment_service import analyze_comment, get_sentiment_badge
 from .services.tmdb_service import fetch_movie_details
 
 
-logger = logging.getLogger(__name__)
+
+
 
 
 # --- 1. CANLI ARAMA API (SPOTIFY TARZI) ---
-def live_search_navbar(request):
-    """Navbar'daki anlık arama kutusu için JSON döner."""
+def live_search(request):
+    """
+    Navbar'daki anlık arama kutusu için JSON döner.
+    Spotify tarzı hızlı sonuç gösterimi sağlar.
+    """
     term = request.GET.get("term", "").strip()
     results = []
 
     if len(term) > 1:
-        filmler = Film.objects.all().order_by("-id")[:200]  # performans
-        term_lower = tr_lower(term)
+        # Performans: DB seviyesinde arama yap
+        filmler = Film.objects.filter(isim__icontains=term)[:10]
 
         for film in filmler:
-            if term_lower in tr_lower(film.isim):
-                results.append(
-                    {
-                        "id": film.id,
-                        "isim": film.isim,
-                        "poster": film.poster_url,
-                        "yil": film.yil,
-                        "puan": film.puan,
-                    }
-                )
-            if len(results) >= 10:
-                break
+            results.append({
+                "id": film.id,
+                "isim": film.isim,
+                "poster": film.poster_url,
+                "yil": film.yil,
+                "puan": film.puan,
+            })
 
     return JsonResponse(results, safe=False)
 
@@ -280,37 +279,4 @@ def toplu_film_ekle(request):
     return redirect("anasayfa")
 
 
-def live_search(request):
-    """AJAX canlı arama endpoint'i (Orijinal)."""
-    # Note: live_search_navbar yukarıda tanımlandı, ama urls.py muhtemelen buna bakıyor
-    # İsim çakışması olmamalı. URL conf'u kontrol etmemiz lazım.
-    # Orijinal dosyada iki tane live_search vardı (biri line 255, biri line 623).
-    # Line 255'teki aslında 'live_search' olarak tanımlanmıştı ve navbar için kullanılıyordu.
-    # Line 623'teki de 'live_search' idi. Python'da son tanımlanan geçerlidir.
-    # Bu yüzden sadece sonuncusunu (basit olanı) koruyorum veya birleştiriyorum.
-    
-    # İnceleme:
-    # İlk live_search (line 255): detaylı json dönüyor (poster vs).
-    # İkinci live_search (line 623): basit json dönüyor.
-    # Muhtemelen bir hata vardı. Ben gelişmiş olanı (line 255) 'live_search' olarak tutacağım.
-    
-    term = request.GET.get("term", "").strip()
-    results = []
 
-    if len(term) > 1:
-        filmler = Film.objects.all().order_by("-id")[:5] # Limit 5
-        term_lower = tr_lower(term)
-
-        for film in filmler:
-            if term_lower in tr_lower(film.isim):
-                results.append(
-                    {
-                        "id": film.id,
-                        "isim": film.isim,
-                        "poster": film.poster_url,
-                        "yil": film.yil,
-                        "puan": film.puan,
-                    }
-                )
-    
-    return JsonResponse(results, safe=False)
