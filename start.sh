@@ -18,4 +18,9 @@ export TFIDF_PATH="/opt/render/project/src/yapay_zeka_servisi/film_tfidf_3cls.pk
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
+# Render Free Tier'da Shell yok ve disk geçici (Ephemeral).
+# Bu yüzden her açılışta 1 sayfa (20 film) çekip veritabanına ekliyoruz.
+echo "Veritabanı otomatik dolduruluyor (film_cek 1)..."
+python manage.py film_cek 1 || echo "Film çekme işleminde hata oluştu ama devam ediliyor..."
+
 gunicorn sinema_sitesi.wsgi:application --bind 0.0.0.0:$PORT --timeout 180 --workers 1 --threads 2
