@@ -1,5 +1,5 @@
 # Framework
-Django>=6.0,<7.0
+Django>=5.0,<6.0
 python-decouple
 requests
 gunicorn
@@ -14,3 +14,5 @@ scikit-learn
 joblib
 numpy
 pandas
+gdown
+

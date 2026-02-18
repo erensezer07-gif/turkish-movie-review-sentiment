@@ -117,11 +117,17 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
    pip install -r requirements.txt
    ```
 
+4. **Modeli indirin:**
+   ```bash
+   python scripts/download_model.py
+   ```
+
     > ⚠️ **Python Sürümü Notu:**
     > Proje production ortamında (Render) `runtime.txt` dosyasında belirtilen **Python 3.11.9** ile çalışmaktadır.
     > Local geliştirme ortamınızda **Python 3.11+** (ör. 3.11.4) kullanmanız yeterlidir, ancak birebir uyumluluk için 3.11.9 önerilir.
 
-4. **Ortam değişkenlerini (.env) ayarlayın:**
+
+5. **Ortam değişkenlerini (.env) ayarlayın:**
    Projeyi çalıştırmak için `.env` dosyası oluşturun:
    ```ini
    SECRET_KEY=gizli_anahtariniz
@@ -129,7 +135,7 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
    TMDB_API_KEY=tmdb_api_key_buraya
    ```
 
-5. **Veritabanını başlatın ve çalıştırın:**
+6. **Veritabanını başlatın ve çalıştırın:**
    ```bash
    python manage.py runserver
    ```
