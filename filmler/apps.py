@@ -36,9 +36,12 @@ class FilmlerConfig(AppConfig):
                 logger.info(f"AI Warmup SKIPPED (Command: {command})")
                 return
 
-        # 2. Env Var ile Kontrol (ENABLE_AI_WARMUP=False ise yapma)
+        # 2. Env Var ile Kontrol (ENABLE_AI_WARMUP=False veya DISABLE_WARMUP=1 ise yapma)
         # Default: True (Production'da workers icin)
         enable_warmup = os.environ.get("ENABLE_AI_WARMUP", "True").lower() in ("true", "1", "yes")
+        if os.environ.get("DISABLE_WARMUP", "0") == "1":
+            enable_warmup = False
+
         if not enable_warmup:
             logger.info("AI Warmup DISABLED via environment variable.")
             return
