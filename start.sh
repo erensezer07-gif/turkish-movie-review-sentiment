@@ -18,4 +18,4 @@ export TFIDF_PATH="/opt/render/project/src/yapay_zeka_servisi/film_tfidf_3cls.pk
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
-gunicorn sinema_sitesi.wsgi:application --bind 0.0.0.0:$PORT
+gunicorn sinema_sitesi.wsgi:application --bind 0.0.0.0:$PORT --timeout 300
