@@ -21,6 +21,12 @@ def load_model():
 
     with _model_loading_lock:
         if _ensemble_module is None:
+            # Warmup devre dışı mı? (Render start sırasında gereksiz yükleme yapmasın diye)
+            import os
+            if os.environ.get("DISABLE_WARMUP", "0") == "1":
+                logger.info("DISABLE_WARMUP=1 tespit edildi. Model yükleme atlanıyor (Lazy Load bekleniyor).")
+                return None
+
             try:
                 logger.info("Yapay Zeka modulu yukleniyor (Warmup)...")
                 # sys.path ayarı gerekebilir, ancak proje kök dizini genelde path'tedir.

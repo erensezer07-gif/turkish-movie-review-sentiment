@@ -488,6 +488,18 @@ def load_bert(model_path: Path):
         model = AutoModelForSequenceClassification.from_pretrained(str(model_path), local_files_only=True)
         model.to(device)
         model.eval()
+        
+        # ✅ Dynamic Quantization (RAM Optimizasyonu)
+        # Sadece Linear katmanları int8'e çevirir. Model boyutu ~%50 küçülür.
+        # CPU inference hızlanır, RAM rahatlar.
+        try:
+            print("[INFO] Applying Dynamic Quantization (int8)...")
+            model = torch.quantization.quantize_dynamic(
+                model, {torch.nn.Linear}, dtype=torch.qint8
+            )
+            print("[OK] Quantization applied successfully.")
+        except Exception as e:
+            print(f"[WARN] Quantization failed: {e}")
 
         print("[OK] BERT LOADED num_labels:", model.config.num_labels)
         print("[OK] BERT LOADED id2label:", model.config.id2label)
