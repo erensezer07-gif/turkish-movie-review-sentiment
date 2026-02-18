@@ -3,7 +3,7 @@
 
 **AI destekli, Türkçe film yorumları üzerinde hibrit duygu analizi yapan ve TMDB API ile zenginleştirilmiş modern bir film analiz platformu.**
 
-## 🌐 Canlı Demo
+
 
 ## 🌐 Canlı Demo
 
@@ -28,7 +28,7 @@ Duygu analizi sistemi **3 sınıflı (Olumlu / Nötr / Olumsuz)** sınıflandır
 **Model Künyesi:**
 * 📦 **Model Versiyonu:** `benim_bert_modelim_3cls_v2`
 * 🤖 **Mimari:** Fine-tuned BERT (`dbmdz/bert-base-turkish-cased`)
-* 📊 **Yardımcı Model:** TF-IDF + Logistic Regression
+* 📊 **Yardımcı Model:** TF-IDF + Logistic Regression (Not: `film_tfidf_3cls.pkl`, ~10MB boyutu ve deployment tutarlılığı için repo'ya dahil edilmiştir.)
 * 🛡️ **Guardrails:** İroni, Spam ve Anlamsız Metin Filtresi
 
 🚀 **Veri Seti:** Model, **Beyazperde** ve diğer kaynaklardan toplanan **190.000+ satırlık** temizlenmiş Türkçe film yorum veri seti ile eğitilmiştir.
@@ -116,6 +116,10 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
    ```bash
    pip install -r requirements.txt
    ```
+
+    > ⚠️ **Python Sürümü Notu:**
+    > Proje production ortamında (Render) `runtime.txt` dosyasında belirtilen **Python 3.11.9** ile çalışmaktadır.
+    > Local geliştirme ortamınızda **Python 3.11+** (ör. 3.11.4) kullanmanız yeterlidir, ancak birebir uyumluluk için 3.11.9 önerilir.
 
 4. **Ortam değişkenlerini (.env) ayarlayın:**
    Projeyi çalıştırmak için `.env` dosyası oluşturun:

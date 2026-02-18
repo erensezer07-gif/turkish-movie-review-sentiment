@@ -168,19 +168,19 @@ def film_detay(request, film_id):
             messages.error(request, msg)
             return redirect("film_detay", film_id=film.id)
 
+        if len(gelen_yorum) < 2:
+            msg = "Yorum çok kısa."
+            if is_ajax:
+                return JsonResponse({"ok": False, "error": msg}, status=400)
+            messages.warning(request, msg)
+            return redirect("film_detay", film_id=film.id)
+
         # 🚫 Anlamsız metin kontrolü
         if anlamsiz_mi(gelen_yorum):
             msg = "⛔ Yorumunuz anlamlı bir metin içermiyor. Lütfen gerçek bir yorum yazın."
             if is_ajax:
                 return JsonResponse({"ok": False, "error": msg}, status=400)
             messages.error(request, msg)
-            return redirect("film_detay", film_id=film.id)
-
-        if len(gelen_yorum) < 2:
-            msg = "Yorum çok kısa."
-            if is_ajax:
-                return JsonResponse({"ok": False, "error": msg}, status=400)
-            messages.warning(request, msg)
             return redirect("film_detay", film_id=film.id)
 
         # AI Analiz

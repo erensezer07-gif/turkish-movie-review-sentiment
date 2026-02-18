@@ -16,23 +16,37 @@ class ModerationServiceTest(TestCase):
         self.assertFalse(kufur_kontrol("Çok güzel bir film"))
         self.assertFalse(kufur_kontrol("Harika oyunculuk"))
 
-    def test_anlamsiz_mi(self):
-        # Edge Case: Klavye ezme / Gibberish
-        self.assertTrue(anlamsiz_mi("asdasdasd"))
-        self.assertTrue(anlamsiz_mi("qweqweqwe"))
+    def test_anlamsiz_mi_edge_cases(self):
+        """
+        Anlamsız metin kontrolü için detaylı edge-case testleri.
+        """
+        # 1. Klavye Ezme (Gibberish)
+        self.assertTrue(anlamsiz_mi("asdasdasd"), "Standart gibberish yakalanmalı")
+        self.assertTrue(anlamsiz_mi("qweqweqwe"), "QWE deseni yakalanmalı")
         
-        # Edge Case: Sessiz harf yığını (Rule A)
-        self.assertTrue(anlamsiz_mi("dmşkamk")) # 4+ sessiz
+        # 2. Sessiz Harf Yığını (Rule A: Consonant Cluster)
+        self.assertTrue(anlamsiz_mi("dmşkamk"), "Sessiz harf yığını yakalanmalı")
+        self.assertTrue(anlamsiz_mi("strkpl"), "Sesli harf içermeyen uzun kelime yakalanmalı")
         
-        # Edge Case: Sesli harf yokluğu (Rule B)
-        self.assertTrue(anlamsiz_mi("trkc")) # >3 harf, sesli yok
+        # 3. Sesli Harf Yokluğu / Kısa Anlamsız (Rule B)
+        self.assertTrue(anlamsiz_mi("trkc"), "Sesli harf yoksa yakalanmalı")
+        self.assertTrue(anlamsiz_mi("bc"), "Çok kısa ve sesli yoksa yakalanmalı")
         
-        # Edge Case: Noktalama istismarı (Rule C)
-        self.assertTrue(anlamsiz_mi("s.a.l.a.k"))
-        
-        # Valid Case: Normal Cümle
-        self.assertFalse(anlamsiz_mi("Bu film gerçekten harikaydı."))
-        self.assertFalse(anlamsiz_mi("Oyunculuk çok başarılı."))
+        # 4. Noktalama İstismarı (Rule C)
+        self.assertTrue(anlamsiz_mi("s.a.l.a.k"), "Noktalama ile ayrılmış harfler yakalanmalı")
+        self.assertTrue(anlamsiz_mi("......."), "Sadece noktalama içeren yorum yakalanmalı")
+        self.assertTrue(anlamsiz_mi("??????"), "Sadece noktalama içeren yorum yakalanmalı")
+
+        # 5. Tekrar Eden Karakterler (Repetitive Chars)
+        self.assertTrue(anlamsiz_mi("aaaaaaaaaa"), "Tekrar eden aynı karakter yakalanmalı")
+        self.assertTrue(anlamsiz_mi("hahahahahah"), "Tekrar eden hece (eğer stopwords değilse) yakalanabilir (context bağlı)")
+
+        # 6. Valid Case: Normal Cümleler & Kısa Geçerli Kelimeler
+        self.assertFalse(anlamsiz_mi("Bu film gerçekten harikaydı."), "Normal cümle geçerli olmalı")
+        self.assertFalse(anlamsiz_mi("Oyunculuk çok başarılı."), "Normal cümle geçerli olmalı")
+        self.assertFalse(anlamsiz_mi("Ok."), "Kısa ama geçerli kelime (stopwords/common) geçmeli")
+        self.assertFalse(anlamsiz_mi("Evet"), "Kısa ama geçerli kelime geçmeli")
+        self.assertFalse(anlamsiz_mi("İyi"), "Kısa Türkçe kelime geçmeli")
 
 
 class SentimentServiceTest(TestCase):
@@ -48,18 +62,48 @@ class SentimentServiceTest(TestCase):
         self.assertEqual(result["confidence"], 0.0)
         self.assertEqual(result["source"], "api_error")
 
-    @patch('filmler.services.sentiment_service.analiz_yap')
-    def test_analyze_comment_import_error(self, mock_analiz_yap):
+    @patch('filmler.services.sentiment_service.analiz_yap', None)
+    def test_analyze_comment_import_error(self):
         # Senaryo: AI Client None (Import Error simülasyonu)
-        # analyze_comment içinde analiz_yap import edilemezse None oluyor.
-        # Bunu test etmek için views.py'yi reload etmek gerekebilir ama
-        # mock ile fonksiyonun kendisini None yapamayız (patch hata verir).
-        # Ancak analyze_comment içindeki `if analiz_yap is None` bloğunu test etmek için:
-        
-        with patch('filmler.services.sentiment_service.analiz_yap', None):
-             result = analyze_comment("Test")
-             self.assertEqual(result["decision"], "NÖTR")
-             self.assertEqual(result["source"], "api_error")
+        result = analyze_comment("Test")
+        self.assertEqual(result["decision"], "NÖTR")
+        self.assertEqual(result["source"], "api_error")
+
+    def test_invalid_inputs(self):
+        """
+        Geçersiz input tipleri (None, boş string, int) NÖTR dönmeli.
+        """
+        invalid_inputs = [None, "", 123, [], {}]
+        for bad_input in invalid_inputs:
+            result = analyze_comment(bad_input)
+            self.assertEqual(result["decision"], "NÖTR", f"Input failed: {bad_input}")
+            self.assertEqual(result["source"], "invalid_input")
+
+    @patch('filmler.services.sentiment_service.analiz_yap')
+    def test_normalization(self, mock_analiz_yap):
+        """
+        API farklı formatlarda dönse bile (Olumlu, OLUMLU, olumlu)
+        servis standart çıktı üretmeli.
+        """
+        scenarios = [
+            ("Olumlu", "OLUMLU"),
+            ("olumlu", "OLUMLU"),
+            ("OLUMLU", "OLUMLU"),
+            ("Olumsuz", "OLUMSUZ"),
+            ("Kararsız", "NÖTR"),
+            ("Nötr", "NÖTR"),
+        ]
+
+        for api_output, expected_db in scenarios:
+            mock_analiz_yap.return_value = {
+                "karar": api_output,
+                "guven_skoru": 0.99,
+                "kaynak": "test",
+                "sure_sn": 0.1
+            }
+            
+            result = analyze_comment("Test")
+            self.assertEqual(result["decision"], expected_db, f"Normalization failed for {api_output}")
 
 
 class ViewTest(TestCase):
@@ -84,21 +128,31 @@ class ViewTest(TestCase):
         self.assertIn("yil", item)
         self.assertIn("puan", item)
 
+    def test_live_search_edge_cases(self):
+        # 1. Boş Query -> Boş Liste
+        response = self.client.get(reverse('live_search'), {'term': ''})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+        # 2. Tek Karakter -> Boş Liste (Performans optimizasyonu)
+        response = self.client.get(reverse('live_search'), {'term': 'M'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+        # 3. Bulunamayan Film -> Boş Liste
+        response = self.client.get(reverse('live_search'), {'term': 'Zzzzzzzzz'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
     @patch('filmler.views.analyze_comment') # View içindeki servisi mockluyoruz
-    def test_film_detay_post_flow(self, mock_analyze):
+    def test_film_detay_post_standard_flow(self, mock_analyze):
+        """
+        Standart POST akışı (Redirect ile)
+        """
         self.client.login(username='testuser', password='password')
         url = reverse('film_detay', args=[self.film.id])
         
-        # 1. Senaryo: Küfürlü Yorum
-        response = self.client.post(url, {'yorum_icerigi': 'Bu bir amk filmi'})
-        # Küfür yakalanmalı, kaydedilmemeli. 
-        # Mesaj framework'ü kullanıldığı için redirect döner (302)
-        # Mesajı kontrol etmek integration test işi, count kontrolü yeterli.
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(Yorum.objects.count(), 0)
-
-        # 2. Senaryo: Normal Yorum
-        # AI sonucunu mockla
+        # AI Sonucunu Mockla
         mock_analyze.return_value = {
             "decision": "OLUMLU",
             "confidence": 0.95,
@@ -106,10 +160,39 @@ class ViewTest(TestCase):
             "duration": 0.1
         }
         
+        # Valid POST
         response = self.client.post(url, {'yorum_icerigi': 'Harika bir filmdi kesinlikle izleyin.'})
-        self.assertEqual(response.status_code, 302) # Redirect to self
+        
+        # Redirect döner (302)
+        self.assertEqual(response.status_code, 302)
         self.assertEqual(Yorum.objects.count(), 1)
         
+        # Veriyi doğrula
         yorum = Yorum.objects.first()
         self.assertEqual(yorum.icerik, 'Harika bir filmdi kesinlikle izleyin.')
-        self.assertEqual(yorum.ai_kaynak, 'mock_ai')
+        self.assertEqual(yorum.ai_karari, 'OLUMLU')
+
+    def test_film_detay_ajax_errors(self):
+        """
+        AJAX isteklerinde hataların 400 + JSON dönmesi gerektiğini doğrular.
+        """
+        self.client.login(username='testuser', password='password')
+        url = reverse('film_detay', args=[self.film.id])
+        headers = {'HTTP_X_REQUESTED_WITH': 'XMLHttpRequest'}
+
+        # 1. Küfürlü Yorum (AJAX)
+        response = self.client.post(url, {'yorum_icerigi': 'Senin amk'}, **headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertJSONEqual(response.content, {"ok": False, "error": "⛔ Yorumunuz uygunsuz ifade içeriyor. Lütfen saygılı bir dil kullanın."})
+        self.assertEqual(Yorum.objects.count(), 0)
+
+        # 2. Anlamsız Yorum (AJAX)
+        response = self.client.post(url, {'yorum_icerigi': 'asdasdasd'}, **headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("anlamlı bir metin", response.json()["error"])
+
+        # 3. Çok Kısa Yorum (AJAX)
+        response = self.client.post(url, {'yorum_icerigi': 'a'}, **headers)
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Yorum çok kısa", response.json()["error"])
+
