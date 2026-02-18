@@ -7,8 +7,8 @@
 
 ## 🌐 Canlı Demo
 
-🔗 **Demo:** https://sezerfilm-ai.onrender.com
-*(Deploy sonrası aktif olacaktır.)*
+🔗 **Demo:** https://turkish-movie-review-sentiment.onrender.com
+
 
 > ⚠️ **Teknik Not:** AI duygu analizi modeli, harici bir API yerine doğrudan Django uygulaması içinde (**Direct Mode**) çalışmaktadır. Sunucu uyku modundaysa (Cold Start), modelin belleğe yüklenmesi nedeniyle ilk analizde 10-15 saniyelik bir gecikme yaşanabilir. Sonraki analizler milisaniyeler sürer.
 
