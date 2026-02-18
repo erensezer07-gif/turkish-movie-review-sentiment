@@ -23,4 +23,4 @@ python manage.py collectstatic --noinput
 echo "Veritabanı otomatik dolduruluyor (film_cek 1)..."
 python manage.py film_cek 1 || echo "Film çekme işleminde hata oluştu ama devam ediliyor..."
 
-gunicorn sinema_sitesi.wsgi:application --bind 0.0.0.0:$PORT --timeout 180 --workers 1 --threads 2
+gunicorn sinema_sitesi.wsgi:application --bind 0.0.0.0:$PORT --timeout 600 --workers 1 --threads 2
