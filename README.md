@@ -10,7 +10,11 @@
 🔗 **Demo:** https://turkish-movie-review-sentiment.onrender.com
 
 
-> ⚠️ **Teknik Not:** AI duygu analizi modeli, harici bir API yerine doğrudan Django uygulaması içinde (**Direct Mode**) çalışmaktadır. Sunucu uyku modundaysa (Cold Start), modelin belleğe yüklenmesi nedeniyle ilk analizde 10-15 saniyelik bir gecikme yaşanabilir. Sonraki analizler milisaniyeler sürer.
+> **⚠️ Önemli Not (Render Free Tier):**
+> Bu proje Render.com'un **ücretsiz sunucularında** barındırılmaktadır. Bu nedenle:
+> 1.  **Açılış Hızı:** Kullanılmadığında sunucu uyku moduna geçer, ilk açılış **1-2 dakika** sürebilir.
+> 2.  **AI Analizi (İlk Sefer):** İlk film yorumunu yaptığınızda Yapay Zeka modeli yüklenir. Bu işlem **3-4 dakika** sürebilir (Timeout artırıldı, lütfen bekleyin). Sonraki yorumlar **anında** analiz edilir.
+> 3.  **Veri Sıfırlanması:** Ücretsiz planda disk geçicidir. Her yeniden başlatmada veritabanı sıfırlanır ve otomatik olarak **ilk 20 film** yeniden çekilir.
 
 
 ## ✨ Özellikler
