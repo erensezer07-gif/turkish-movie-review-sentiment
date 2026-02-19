@@ -10,11 +10,13 @@
 🔗 **Demo:** https://turkish-movie-review-sentiment.onrender.com
 
 
-> **⚠️ Önemli Not (Render Free Tier):**
-> Bu proje Render.com'un **ücretsiz sunucularında** barındırılmaktadır. Bu nedenle:
-> 1.  **Açılış Hızı:** Kullanılmadığında sunucu uyku moduna geçer, ilk açılış **1-2 dakika** sürebilir.
-> 2.  **AI Analizi (İlk Sefer):** İlk film yorumunu yaptığınızda Yapay Zeka modeli yüklenir. Bu işlem **3-4 dakika** sürebilir (Timeout artırıldı, lütfen bekleyin). Sonraki yorumlar **anında** analiz edilir.
-> 3.  **Veri Sıfırlanması:** Ücretsiz planda disk geçicidir. Her yeniden başlatmada veritabanı sıfırlanır ve otomatik olarak **ilk 20 film** yeniden çekilir.
+> **⚠️ Önemli Not (Render Free Tier Sınırlamaları):**
+> Bu proje, **Render.com'un Ücretsiz (Free Tier)** sunucularında barındırılmaktadır. Bu sunucular sadece **512 MB RAM** ve paylaşımlı CPU gücü sunmaktadır. Projede kullanılan **BERT** tabanlı Yapay Zeka modeli oldukça büyük olduğu için bu donanım sınırlarını zorlamaktadır.
+>
+> Bu kısıtlamalar nedeniyle:
+> 1.  **Açılış Hızı:** Sunucu kullanılmadığında uyku moduna geçer, uyanması **1-2 dakika** sürebilir.
+> 2.  **Yavaş İlk Analiz:** Model belleğe (RAM) sığmak için özel sıkıştırma (Quantization) teknikleriyle yüklenir. İlk yorum yapıldığında modelin diskten okunup RAM'e yüklenmesi **3-4 dakika** sürebilir. Sonraki analizler hızlıdır.
+> 3.  **Veri Kalıcılığı:** Ücretsiz disk (Ephemeral) kullanıldığı için sunucu her yeniden başladığında veritabanı sıfırlanır (Otomatik olarak yeniden film çekilir).
 
 
 ## ✨ Özellikler
