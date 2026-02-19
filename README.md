@@ -129,24 +129,32 @@ Projeyi kendi bilgisayarınızda çalıştırmak için:
    ```bash
    python scripts/download_model.py
    ```
-
-    > ⚠️ **Python Sürümü Notu:**
-    > Proje production ortamında (Render) `runtime.txt` dosyasında belirtilen **Python 3.11.9** ile çalışmaktadır.
-    > Local geliştirme ortamınızda **Python 3.11+** (ör. 3.11.4) kullanmanız yeterlidir, ancak birebir uyumluluk için 3.11.9 önerilir.
-
+   > ⚠️ **Not:** Model yaklaşık 400MB boyutundadır. İndirme tamamlanmadan proje çalışmaz.
 
 5. **Ortam değişkenlerini (.env) ayarlayın:**
-   Projeyi çalıştırmak için `.env` dosyası oluşturun:
+   Projeyi çalıştırmak için ana dizinde `.env` dosyası oluşturun:
    ```ini
    SECRET_KEY=gizli_anahtariniz
    DEBUG=True
    TMDB_API_KEY=tmdb_api_key_buraya
    ```
 
-6. **Veritabanını başlatın ve çalıştırın:**
+6. **Veritabanını hazırlayın:**
+   ```bash
+   python manage.py migrate
+   ```
+
+7. **Örnek verileri çekin:**
+   Veritabanını doldurmak için (örneğin 1 sayfa film):
+   ```bash
+   python manage.py film_cek 1
+   ```
+
+8. **Sunucuyu başlatın:**
    ```bash
    python manage.py runserver
    ```
+   Adres: http://127.0.0.1:8000
 
 ## 📦 Dependency Yönetimi
 
