@@ -17,6 +17,8 @@
 > 1.  **Açılış Hızı:** Sunucu kullanılmadığında uyku moduna geçer, uyanması **1-2 dakika** sürebilir.
 > 2.  **Yavaş İlk Analiz:** Model belleğe (RAM) sığmak için özel sıkıştırma (Quantization) teknikleriyle yüklenir. İlk yorum yapıldığında modelin diskten okunup RAM'e yüklenmesi **3-4 dakika** sürebilir. Sonraki analizler hızlıdır.
 > 3.  **Veri Kalıcılığı:** Ücretsiz disk (Ephemeral) kullanıldığı için sunucu her yeniden başladığında veritabanı sıfırlanır (Otomatik olarak yeniden film çekilir).
+>
+> 💡 **Tavsiye:** *Tam performanslı ve kesintisiz bir deneyim için projeyi kendi bilgisayarınıza klonlayıp çalıştırmanız önerilir.*
 
 
 ## ✨ Özellikler
