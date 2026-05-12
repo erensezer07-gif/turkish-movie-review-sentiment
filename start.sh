@@ -1,26 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-MODEL_DIR=/tmp/bert_model
+# ──────────────────────────────────────────────────────────────────────
+# Render Start Script — SezerFilm
+# ──────────────────────────────────────────────────────────────────────
+# Build aşamasında migrate çalıştırıldı ve şema image'e gömüldü.
+# Yine de Render Free Tier'da disk Ephemeral; restart'ta DB sıfırlanır.
+# Bu yüzden burada da idempotent migrate + film_cek + superuser çalıştırırız.
+# ──────────────────────────────────────────────────────────────────────
 
-if [ ! -d "$MODEL_DIR" ]; then
-  echo "Downloading BERT model..."
-  python -m pip install -q gdown==5.2.0
-  gdown --fuzzy "https://drive.google.com/file/d/1r3Hxo_fnYWu0VtHZgpPne_7IaY2EQ21W/view?usp=sharing" -O /tmp/bert.zip
-  echo "Unzipping model..."
-  mkdir -p "$MODEL_DIR"
-  unzip -q /tmp/bert.zip -d "$MODEL_DIR"
-fi
-
-export BERT_MODEL_PATH="$MODEL_DIR"
-export TFIDF_PATH="/opt/render/project/src/yapay_zeka_servisi/film_tfidf_3cls.pkl"
-
+echo "▶ Migrate (idempotent)"
 python manage.py migrate --noinput
-python manage.py collectstatic --noinput
 
-# Render Free Tier'da Shell yok ve disk geçici (Ephemeral).
-# Bu yüzden her açılışta 1 sayfa (20 film) çekip veritabanına ekliyoruz.
-echo "Veritabanı otomatik dolduruluyor (film_cek 1)..."
-python manage.py film_cek 1 || echo "Film çekme işleminde hata oluştu ama devam ediliyor..."
+echo "▶ Süper kullanıcı garantisi (env vars varsa)"
+python manage.py ensure_superuser || echo "  (atlandı)"
 
-gunicorn sinema_sitesi.wsgi:application --bind 0.0.0.0:$PORT --timeout 600 --workers 1 --threads 2
+echo "▶ İlk filmler çekiliyor (TMDB sayfa 1)"
+python manage.py film_cek 1 || echo "  (TMDB hatası, devam)"
+
+echo "▶ Gunicorn başlatılıyor"
+exec gunicorn sinema_sitesi.wsgi:application \
+    --bind 0.0.0.0:$PORT \
+    --timeout 600 \
+    --workers 1 \
+    --threads 2 \
+    --preload

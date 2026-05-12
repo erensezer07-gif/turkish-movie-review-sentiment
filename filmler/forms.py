@@ -23,6 +23,12 @@ class UserRegisterForm(UserCreationForm):
             'username': forms.TextInput(attrs={"placeholder": "Kullanıcı adınız"}),
         }
 
+    def clean_email(self):
+        email = self.cleaned_data.get("email", "").strip().lower()
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("Bu e-posta adresi zaten kullanılıyor.")
+        return email
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Şifre alanlarını Türkçeleştir

@@ -3,523 +3,886 @@
 {% block title %}{{ film.isim }} ({{ film.yil }}) — SEZER FILM{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-    /* ==========================================
-       IMDb PRO TARZI FİLM DETAY SAYFASI
-       ========================================== */
+    /* ============================================
+       FİLM DETAY — IMDb PRO TARZI
+       ============================================ */
 
-    /* --- HERO BÖLÜMÜ (BACKDROP + POSTER) --- */
-    .hero-section {
+    /* ---------- HERO ---------- */
+    .detail-hero {
         position: relative;
-        background-color: #000;
-        color: white;
-        padding: 40px 0;
-        margin-bottom: 30px;
-        border-radius: 0 0 20px 20px;
+        width: 100%;
+        margin-bottom: 48px;
+        background: var(--bg-elev);
         overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        min-height: 450px;
-        /* Video için min yükseklik */
-        transition: 0.3s;
-    }
-
-    .hero-bg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-size: cover;
-        background-position: center top;
-        opacity: 0.3;
-        filter: blur(20px);
-        z-index: 1;
-    }
-
-    .hero-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.95) 100%);
-        z-index: 2;
-    }
-
-    .hero-content {
-        position: relative;
-        z-index: 3;
-        display: flex;
-        gap: 30px;
-        align-items: flex-start;
-    }
-
-    .hero-poster {
-        width: 280px;
-        border-radius: 12px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.6);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .hero-info {
-        flex: 1;
-        padding-top: 10px;
-    }
-
-    .hero-title {
-        font-size: 3rem;
-        font-weight: 800;
-        line-height: 1.1;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-    }
-
-    .hero-meta {
+        min-height: 480px;
         display: flex;
         align-items: center;
-        gap: 15px;
-        color: #ccc;
-        font-size: 1rem;
-        margin-bottom: 20px;
     }
 
-    .hero-meta i {
-        color: #f5c518;
-        margin-right: 5px;
+    .detail-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center 20%;
+        opacity: 0.35;
+        filter: blur(2px) saturate(1.1);
     }
 
-    .hero-actions {
+    .detail-overlay {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, var(--bg) 0%, rgba(11,11,15,0.7) 60%, transparent 100%),
+            linear-gradient(180deg, transparent 0%, var(--bg) 100%);
+    }
+
+    .detail-content {
+        position: relative;
+        z-index: 5;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 40px;
+        padding: 56px 0;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    @media (max-width: 768px) {
+        .detail-content { grid-template-columns: 1fr; gap: 24px; padding: 32px 0; }
+        .detail-poster { max-width: 200px; margin: 0 auto; }
+    }
+
+    .detail-poster {
+        width: 100%;
+        aspect-ratio: 2/3;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .detail-info {
+        min-width: 0;
+        padding-top: 16px;
+    }
+
+    .detail-genre-badges {
         display: flex;
-        gap: 15px;
-        margin-top: 20px;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .genre-badge {
+        padding: 3px 10px;
+        background: rgba(245, 197, 24, 0.1);
+        border: 1px solid rgba(245, 197, 24, 0.25);
+        color: var(--accent);
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .detail-title {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        letter-spacing: -0.025em;
+        line-height: 1.1;
+        margin: 0 0 14px;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .detail-meta {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        margin-bottom: 22px;
+    }
+
+    .detail-meta .dot { color: var(--text-muted); }
+
+    .detail-meta .imdb-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent);
+        color: #000;
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .detail-overview {
+        color: #d1d1da;
+        line-height: 1.7;
+        font-size: 1rem;
+        margin-bottom: 28px;
+        max-width: 760px;
+    }
+
+    .detail-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .btn-trailer {
-        background: rgba(255, 255, 255, 0.15);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 10px 20px;
-        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 22px;
+        background: var(--text);
+        color: #000;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+    }
+    .btn-trailer:hover {
+        background: var(--accent);
+        color: #000;
+        transform: translateY(-1px);
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 18px;
+        background: var(--bg-elev);
+        color: var(--text-dim);
+        border: 1px solid var(--line);
+        border-radius: 10px;
         font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all .2s;
+    }
+    .btn-back:hover {
+        background: var(--bg-elev-2);
+        color: var(--text);
+        border-color: var(--line-2);
+    }
+
+    /* ---------- VIDEO MODAL ---------- */
+    .video-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1100;
+        background: rgba(0, 0, 0, 0.92);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        animation: fadeIn .25s ease;
+    }
+
+    .video-modal.show { display: flex; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .video-modal-inner {
+        position: relative;
+        width: 100%;
+        max-width: min(1100px, 92vw);
+        aspect-ratio: 16/9;
+        max-height: calc(100vh - 100px);
+        background: #000;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+    }
+
+    #videoIframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    #closeVideoBtn {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.95rem;
+        transition: all .15s;
+        z-index: 10;
+    }
+    #closeVideoBtn:hover {
+        background: rgba(239, 68, 68, 0.85);
+        border-color: var(--danger);
+        color: white;
+        transform: scale(1.08);
+    }
+
+    .video-modal-title {
+        position: absolute;
+        top: 12px;
+        left: 16px;
+        color: white;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        padding: 7px 14px;
+        border-radius: 100px;
         display: flex;
         align-items: center;
         gap: 8px;
-        transition: 0.2s;
-        text-decoration: none;
-        cursor: pointer;
+        z-index: 10;
+        max-width: calc(100% - 80px);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    .btn-trailer:hover {
-        background: rgba(255, 255, 255, 0.25);
-        color: white;
-        transform: translateY(-2px);
+    .video-modal-title i { color: var(--accent); }
+
+    /* ---------- LAYOUT ---------- */
+    .detail-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 340px;
+        gap: 40px;
+        align-items: start;
     }
 
-    /* --- OYUNCU KADROSU (YATAY SCROLL) --- */
-    .section-title {
-        font-size: 1.4rem;
+    .detail-grid > * { min-width: 0; }
+
+    @media (max-width: 1199px) {
+        .detail-grid { grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; }
+    }
+
+    @media (max-width: 991px) {
+        .detail-grid { grid-template-columns: 1fr; gap: 24px; }
+        .ai-dashboard { position: static !important; }
+    }
+
+    /* ---------- SECTION ---------- */
+    .det-section { margin-bottom: 48px; min-width: 0; max-width: 100%; }
+    .review-box { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+    .review-item { min-width: 0; max-width: 100%; }
+    .rv-text { word-break: break-word; overflow-wrap: anywhere; }
+
+    .det-section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .det-section-title {
+        font-family: 'Manrope', sans-serif;
         font-weight: 700;
-        color: #f5c518;
-        margin-bottom: 15px;
-        padding-left: 10px;
-        border-left: 4px solid #f5c518;
+        font-size: 1.2rem;
+        letter-spacing: -0.02em;
+        margin: 0;
     }
 
+    .det-section-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 7px;
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+    }
+
+    /* ---------- CAST ---------- */
     .cast-scroller {
         display: flex;
-        gap: 15px;
+        gap: 14px;
         overflow-x: auto;
-        padding-bottom: 20px;
-        margin-bottom: 40px;
+        padding-bottom: 8px;
         scrollbar-width: thin;
-        scrollbar-color: #444 #111;
     }
 
-    .cast-scroller::-webkit-scrollbar {
-        height: 8px;
-    }
-
-    .cast-scroller::-webkit-scrollbar-thumb {
-        background: #444;
-        border-radius: 4px;
-    }
-
-    .cast-scroller::-webkit-scrollbar-track {
-        background: #111;
-    }
+    .cast-scroller::-webkit-scrollbar { height: 6px; }
+    .cast-scroller::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 3px; }
+    .cast-scroller::-webkit-scrollbar-track { background: transparent; }
 
     .cast-card {
-        min-width: 140px;
-        width: 140px;
-        background: #1a1a1a;
-        border-radius: 8px;
+        min-width: 130px;
+        width: 130px;
+        background: var(--bg-elev);
+        border-radius: 10px;
         overflow: hidden;
-        border: 1px solid #333;
-        transition: transform 0.2s;
+        border: 1px solid var(--line);
+        transition: all .2s;
+        text-align: center;
     }
 
     .cast-card:hover {
+        border-color: var(--line-2);
         transform: translateY(-3px);
-        border-color: #555;
     }
 
     .cast-img {
         width: 100%;
-        height: 175px;
+        aspect-ratio: 1/1;
         object-fit: cover;
-        background: #222;
+        background: var(--bg-elev-2);
     }
 
-    .cast-info {
-        padding: 10px;
-        text-align: center;
-    }
+    .cast-info { padding: 10px 8px 12px; }
 
     .cast-name {
-        font-weight: 700;
-        color: #fff;
-        font-size: 0.9rem;
-        margin-bottom: 3px;
-        display: block;
+        font-weight: 600;
+        color: var(--text);
+        font-size: 0.85rem;
+        margin: 0 0 2px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
     .cast-role {
-        color: #888;
-        font-size: 0.8rem;
-        display: block;
+        color: var(--text-muted);
+        font-size: 0.75rem;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    /* --- İSTATİSTİKLER (DASHBOARD) --- */
-    .stats-dashboard {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-        margin-bottom: 40px;
+    /* ---------- AI DASHBOARD ---------- */
+    .ai-dashboard {
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 22px;
+        position: sticky;
+        top: 80px;
     }
 
-    .stat-card {
-        background: #151515;
-        border: 1px solid #2a2a2a;
-        padding: 15px;
-        border-radius: 10px;
+    .ai-header {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--line);
     }
 
-    .stat-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
+    .ai-header-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), #ff9500);
+        color: #000;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.2rem;
+        font-size: 0.95rem;
     }
 
-    .stat-data h3 {
-        margin: 0;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: white;
+    .ai-header-text h3 { font-size: 1rem; font-weight: 700; margin: 0; }
+    .ai-header-text p { font-size: 0.75rem; color: var(--text-muted); margin: 0; }
+
+    .ai-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 16px;
     }
 
-    .stat-data p {
-        margin: 0;
-        font-size: 0.8rem;
-        color: #888;
+    .ai-stat {
+        text-align: center;
+        padding: 14px 8px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        transition: all .2s;
+    }
+
+    .ai-stat-num {
+        font-family: 'Manrope', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 6px;
+    }
+
+    .ai-stat-label {
+        font-size: 0.68rem;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.08em;
+        color: var(--text-muted);
+        font-weight: 600;
     }
 
-    .icon-pos {
-        background: rgba(76, 175, 80, 0.15);
-        color: #4caf50;
+    .ai-stat.pos { border-color: rgba(34, 197, 94, 0.25); }
+    .ai-stat.pos .ai-stat-num { color: var(--success); }
+    .ai-stat.neg { border-color: rgba(239, 68, 68, 0.25); }
+    .ai-stat.neg .ai-stat-num { color: var(--danger); }
+    .ai-stat.neu { border-color: rgba(148, 163, 184, 0.25); }
+    .ai-stat.neu .ai-stat-num { color: var(--neutral); }
+
+    .ai-bar {
+        height: 6px;
+        background: var(--bg);
+        border-radius: 100px;
+        overflow: hidden;
+        display: flex;
+        margin-bottom: 16px;
+    }
+    .ai-bar-pos { background: var(--success); }
+    .ai-bar-neg { background: var(--danger); }
+    .ai-bar-neu { background: var(--neutral); }
+
+    .ai-info {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 0.8rem;
+        color: var(--text-dim);
+        line-height: 1.5;
     }
 
-    .icon-neg {
-        background: rgba(244, 67, 54, 0.15);
-        color: #ef5350;
-    }
+    .ai-info i { color: var(--accent); margin-right: 6px; }
 
-    .icon-neu {
-        background: rgba(158, 158, 158, 0.15);
-        color: #bdbdbd;
-    }
-
-    /* --- YORUMLAR --- */
-    .reviews-box {
-        background: #141414;
-        padding: 25px;
-        border-radius: 12px;
-        border: 1px solid #222;
+    /* ---------- COMMENT FORM ---------- */
+    .review-box {
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 24px;
     }
 
     .review-form textarea {
-        background: #0a0a0a;
-        border: 1px solid #333;
-        color: #eee;
-        padding: 15px;
-        border-radius: 8px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--text);
+        padding: 14px 16px;
+        border-radius: 10px;
         width: 100%;
-        min-height: 80px;
-        transition: 0.3s;
+        min-height: 90px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        font-family: inherit;
+        transition: border-color .2s, box-shadow .2s;
+        resize: vertical;
     }
 
     .review-form textarea:focus {
-        border-color: #f5c518;
+        border-color: var(--accent);
         outline: none;
         box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.1);
     }
 
-    .review-item {
-        padding: 20px 0;
-        border-bottom: 1px solid #222;
-        display: flex;
-        gap: 15px;
+    .review-form textarea::placeholder { color: var(--text-muted); }
+
+    .btn-submit {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 11px 22px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all .2s;
     }
+    .btn-submit:hover:not(:disabled) {
+        background: var(--accent-2);
+        transform: translateY(-1px);
+    }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .closed-notice {
+        background: rgba(245, 197, 24, 0.06);
+        border: 1px solid rgba(245, 197, 24, 0.25);
+        color: var(--accent);
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+
+    .login-required {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 24px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .login-required p { margin: 0 0 14px; color: var(--text-dim); }
+
+    /* ---------- FILTER BUTTONS ---------- */
+    .filter-bar {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 18px;
+    }
+
+    .filter-btn {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        color: var(--text-dim);
+        padding: 6px 14px;
+        border-radius: 100px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .filter-btn:hover {
+        border-color: var(--line-2);
+        color: var(--text);
+    }
+
+    .filter-btn.active {
+        background: var(--text);
+        color: #000;
+        border-color: var(--text);
+    }
+
+    /* ---------- REVIEW ITEM ---------- */
+    .review-item {
+        display: flex;
+        gap: 14px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .review-item:last-child { border-bottom: none; }
 
     .rv-avatar {
         width: 40px;
         height: 40px;
-        background: #f5c518;
+        background: linear-gradient(135deg, var(--accent), #ff9500);
         color: #000;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 800;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
+        flex-shrink: 0;
     }
 
-    /* --- RESPONSIVE --- */
-    @media (max-width: 768px) {
-        .hero-content {
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
+    .rv-content { flex: 1; min-width: 0; }
 
-        .hero-poster {
-            width: 180px;
-        }
+    .rv-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
 
-        .hero-meta {
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+    .rv-author { font-weight: 600; font-size: 0.9rem; }
+    .rv-date { color: var(--text-muted); font-size: 0.78rem; }
 
-        .hero-actions {
-            justify-content: center;
-        }
+    .rv-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 2px 9px;
+        border-radius: 100px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
 
-        .hero-title {
-            font-size: 2rem;
-        }
+    .rv-badge.pos { background: rgba(34, 197, 94, 0.12); color: var(--success); }
+    .rv-badge.neg { background: rgba(239, 68, 68, 0.12); color: var(--danger); }
+    .rv-badge.neu { background: rgba(148, 163, 184, 0.12); color: var(--neutral); }
+
+    .rv-text {
+        color: #d1d1da;
+        font-size: 0.93rem;
+        line-height: 1.55;
+        margin: 0;
+        word-break: break-word;
+    }
+
+    .rv-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-muted);
+    }
+
+    .rv-empty i { font-size: 2rem; color: var(--line-2); margin-bottom: 10px; display: block; }
+
+    /* ---------- TOAST ---------- */
+    #toast {
+        display: none;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 14px;
+        font-size: 0.88rem;
+        font-weight: 500;
+    }
+
+    #toast.success {
+        background: rgba(34, 197, 94, 0.1);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: var(--success);
+    }
+
+    #toast.error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: var(--danger);
     }
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- HERO SECTION -->
-<div class="hero-section" id="heroSection">
-
-    <!-- Video Player (Gizli) -->
-    <div id="videoContainer"
-        style="display:none; position:relative; width:100%; height:100%; min-height:450px; background:#000;">
-        <iframe id="videoIframe" style="width:100%; height:450px; border:0;" allowfullscreen
-            allow="autoplay; encrypted-media"></iframe>
-        <button id="closeVideoBtn" class="btn btn-sm btn-danger shadow"
-            style="position:absolute; top:20px; right:20px; z-index:100;">
-            <i class="fa-solid fa-times"></i> Kapat
-        </button>
-    </div>
-
-    <!-- Orijinal İçerik -->
-    <div id="heroContentWrapper">
-        {% if backdrop_url %}
-        <div class="hero-bg" style="background-image: url('{{ backdrop_url }}');"></div>
-        {% endif %}
-        <div class="hero-overlay"></div>
-
-        <div class="container hero-content">
-            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" class="hero-poster">
-
-            <div class="hero-info">
-                <h1 class="hero-title">{{ film.isim }}</h1>
-
-                <div class="hero-meta">
-                    <span>{{ film.yil }}</span>
-                    <span>•</span>
-                    <span>{{ runtime_minutes|default:"-" }} dk</span>
-                    <span>•</span>
-                    <span>{{ genres_text|default:"Tür Bilgisi Yok" }}</span>
-                    <span>•</span>
-
-                    <!-- PUAN GÖSTERİMİ -->
-                    {% if film.puan and film.puan > 0 %}
-                    <span><i class="fa-solid fa-star"></i> {{ film.puan }} / 10</span>
-                    {% else %}
-                    <span class="text-secondary"><i class="fa-regular fa-calendar"></i> Henüz Yayınlanmadı</span>
-                    {% endif %}
-                </div>
-
-                <p style="color: #ddd; line-height: 1.6; max-width: 700px;">
-                    {{ film.konu|default:"Film konusu henüz eklenmemiş." }}
-                </p>
-
-                <div class="hero-actions">
-                    {% load youtube_filters %}
-                    {% if trailer_watch_url %}
-                    <!-- Butona tıklandığında Inline Oynatıcı çalışacak -->
-                    <button type="button" class="btn-trailer" id="playTrailerBtn"
-                        data-url="{{ trailer_watch_url|convert_to_embed }}">
-                        <i class="fa-solid fa-play"></i> Fragmanı İzle
-                    </button>
-                    {% else %}
-                    <span class="text-secondary small">Fragman yok</span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+<!-- ============== TRAILER MODAL ============== -->
+<div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-label="Fragman">
+    <div class="video-modal-inner">
+        <div class="video-modal-title"><i class="fa-solid fa-film"></i> {{ film.isim }} — Fragman</div>
+        <button id="closeVideoBtn" type="button" aria-label="Kapat"><i class="fa-solid fa-xmark"></i></button>
+        <iframe id="videoIframe" allowfullscreen allow="autoplay; encrypted-media; fullscreen"></iframe>
     </div>
 </div>
 
-<!-- ANKET & KADRO -->
-<div class="row">
-    <!-- SOL KOLON (Kadro, Bilgiler) -->
-    <div class="col-lg-8">
+<!-- ============== HERO (full-bleed) ============== -->
+<section class="detail-hero" id="heroSection">
+    {% if backdrop_url %}
+    <div class="detail-bg" style="background-image: url('{{ backdrop_url }}');"></div>
+    {% endif %}
+    <div class="detail-overlay"></div>
 
-        <!-- OYUNCULAR -->
-        <h3 class="section-title">Oyuncular</h3>
-        {% if cast_list %}
-        <div class="cast-scroller">
-            {% for actor in cast_list %}
-            <div class="cast-card">
-                <img src="{{ actor.photo|default:'https://via.placeholder.com/138x175/333/fff?text=?' }}"
-                    alt="{{ actor.name }}" class="cast-img">
-                <div class="cast-info">
-                    <span class="cast-name" title="{{ actor.name }}">{{ actor.name }}</span>
-                    <span class="cast-role" title="{{ actor.character }}">{{ actor.character }}</span>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <p class="text-secondary mb-4">Oyuncu bilgisi bulunamadı.</p>
-        {% endif %}
+    <div class="container-xl">
+        <div class="detail-content">
+                    <img src="{{ film.poster_url }}" alt="{{ film.isim }}" class="detail-poster">
 
-        <!-- YORUMLAR -->
-        <h3 class="section-title">Kullanıcı Yorumları</h3>
-        <div class="reviews-box">
-            <!-- Filtreler -->
-            <div class="d-flex gap-2 mb-3">
-                <button class="btn btn-sm btn-dark border-secondary fbtn active" data-filter="all">Tümü</button>
-                <button class="btn btn-sm btn-dark border-secondary fbtn" data-filter="pos">👍 Olumlu</button>
-                <button class="btn btn-sm btn-dark border-secondary fbtn" data-filter="neg">👎 Olumsuz</button>
-            </div>
-
-            <!-- Yorum Formu -->
-            {% if film.puan and film.puan > 0 %}
-            <form id="reviewForm" class="review-form mb-4">
-                {% csrf_token %}
-                <textarea id="reviewText" name="yorum_icerigi"
-                    placeholder="Bu film hakkında ne düşünüyorsunuz? (En az 3 kelime)" required></textarea>
-                <div class="d-flex justify-content-end mt-2">
-                    <button type="submit" id="reviewBtn" class="btn btn-warning fw-bold">Yorum Gönder</button>
-                </div>
-            </form>
-            {% else %}
-            <div class="alert text-center mb-4"
-                style="background: rgba(245, 197, 24, 0.1); border: 1px solid #f5c518; color: #f5c518; border-radius: 10px; padding: 15px;">
-                <i class="fa-solid fa-clock"></i> <strong>Bu film henüz vizyona girmediği için yorumlara
-                    kapalıdır.</strong>
-            </div>
-            {% endif %}
-
-            <div id="toast"
-                style="display:none; padding:10px; border-radius:5px; margin-bottom:10px; text-align:center;"></div>
-
-            <!-- Yorum Listesi -->
-            <div id="reviewsList">
-                {% for yorum in yorumlar %}
-                <div class="review-item d-flex gap-3 mb-3 p-3 rounded border border-secondary"
-                    data-sentiment="{{ yorum.ai_karari }}" style="background-color: #111 !important; color: #fff;">
-
-                    <div class="user-avatar d-flex align-items-center justify-content-center rounded-circle bg-warning text-dark fw-bold"
-                        style="width: 50px; height: 50px; font-size: 1.2rem; flex-shrink: 0;">
-                        {{ yorum.kullanici_adi|slice:":1"|upper }}
-                    </div>
-
-                    <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="text-white">{{ yorum.kullanici_adi }}</strong>
-                            <small class="text-secondary">{{ yorum.tarih|date:"d M Y" }}</small>
+                    <div class="detail-info">
+                        {% load youtube_filters %}
+                        {% with genre_list=genres_text|default:film.turler|split_by:"," %}
+                        {% if genre_list %}
+                        <div class="detail-genre-badges">
+                            {% for g in genre_list %}
+                            <span class="genre-badge">{{ g }}</span>
+                            {% endfor %}
                         </div>
+                        {% endif %}
+                        {% endwith %}
 
-                        <div class="mb-2">
-                            {% if yorum.ai_karari == 'OLUMLU' %}
-                            <span class="badge bg-success text-white px-3 py-2 rounded-pill">Olumlu</span>
-                            {% elif yorum.ai_karari == 'OLUMSUZ' %}
-                            <span class="badge bg-danger text-white px-3 py-2 rounded-pill">Olumsuz</span>
-                            {% else %}
-                            <span class="badge bg-secondary text-white px-3 py-2 rounded-pill">Nötr</span>
+                        <h1 class="detail-title">{{ film.isim }}</h1>
+
+                        <div class="detail-meta">
+                            {% if film.puan and film.puan > 0 %}
+                            <span class="imdb-pill"><i class="fa-solid fa-star"></i> {{ film.puan }}</span>
                             {% endif %}
+                            {% if film.yil %}<span>{{ film.yil }}</span><span class="dot">•</span>{% endif %}
+                            {% if runtime_minutes %}<span><i class="fa-regular fa-clock"></i> {{ runtime_minutes }} dk</span>{% endif %}
                         </div>
 
-                        <p class="m-0" style="color: #eee; font-size:0.95rem; line-height: 1.5;">{{ yorum.icerik }}</p>
+                        <p class="detail-overview">{{ film.konu|default:"Film konusu henüz eklenmemiş." }}</p>
+
+                        <div class="detail-actions">
+                            {% if trailer_watch_url %}
+                            <button type="button" class="btn-trailer" id="playTrailerBtn"
+                                data-url="{{ trailer_watch_url|convert_to_embed }}">
+                                <i class="fa-solid fa-play"></i> Fragmanı İzle
+                            </button>
+                            {% endif %}
+                            <a href="{% url 'anasayfa' %}" class="btn-back">
+                                <i class="fa-solid fa-arrow-left"></i> Anasayfa
+                            </a>
+                        </div>
                     </div>
                 </div>
-                {% empty %}
-                <p id="emptyMsg" class="text-center text-secondary py-3">Henüz yorum yok. İlk sen yaz! 🚀</p>
-                {% endfor %}
+            </div>
+</section>
+
+<!-- ============== MAIN GRID ============== -->
+<div class="container-xl">
+    <div class="detail-grid">
+
+        <!-- LEFT COLUMN -->
+        <div>
+            <!-- CAST -->
+            <div class="det-section">
+                <div class="det-section-header">
+                    <div class="det-section-icon"><i class="fa-solid fa-users"></i></div>
+                    <h3 class="det-section-title">Oyuncular</h3>
+                </div>
+                {% if cast_list %}
+                <div class="cast-scroller">
+                    {% for actor in cast_list %}
+                    <div class="cast-card">
+                        {% if actor.photo %}
+                        <img src="{{ actor.photo }}" alt="{{ actor.name }}" class="cast-img">
+                        {% else %}
+                        <div class="cast-img" style="display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:1.5rem;">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        {% endif %}
+                        <div class="cast-info">
+                            <p class="cast-name" title="{{ actor.name }}">{{ actor.name }}</p>
+                            <p class="cast-role" title="{{ actor.character }}">{{ actor.character }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Oyuncu bilgisi bulunamadı.</p>
+                {% endif %}
+            </div>
+
+            <!-- REVIEWS -->
+            <div class="det-section">
+                <div class="det-section-header">
+                    <div class="det-section-icon"><i class="fa-solid fa-comments"></i></div>
+                    <h3 class="det-section-title">Kullanıcı Yorumları</h3>
+                </div>
+
+                <div class="review-box">
+                    <!-- Filtre -->
+                    <div class="filter-bar">
+                        <button class="filter-btn active" data-filter="all">
+                            <i class="fa-solid fa-list"></i> Tümü
+                        </button>
+                        <button class="filter-btn" data-filter="OLUMLU">
+                            <i class="fa-solid fa-thumbs-up"></i> Olumlu
+                        </button>
+                        <button class="filter-btn" data-filter="OLUMSUZ">
+                            <i class="fa-solid fa-thumbs-down"></i> Olumsuz
+                        </button>
+                        <button class="filter-btn" data-filter="NÖTR">
+                            <i class="fa-solid fa-scale-balanced"></i> Nötr
+                        </button>
+                    </div>
+
+                    <!-- Form / Login Required / Closed -->
+                    {% if not film.puan or film.puan == 0 %}
+                    <div class="closed-notice">
+                        <i class="fa-regular fa-clock"></i> Bu film henüz vizyona girmediği için yorumlara kapalıdır.
+                    </div>
+                    {% elif user.is_authenticated %}
+                    <form id="reviewForm" class="review-form mb-4">
+                        {% csrf_token %}
+                        <textarea id="reviewText" name="yorum_icerigi"
+                            placeholder="Bu film hakkında düşüncelerinizi paylaşın..." required></textarea>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" id="reviewBtn" class="btn-submit">
+                                <i class="fa-solid fa-paper-plane"></i> Yorum Gönder
+                            </button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="login-required">
+                        <p>Yorum yapabilmek için giriş yapmalısınız.</p>
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn-submit" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                            <i class="fa-solid fa-right-to-bracket"></i> Giriş Yap
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <div id="toast"></div>
+
+                    <!-- Reviews -->
+                    <div id="reviewsList">
+                        {% for yorum in yorumlar %}
+                        <div class="review-item" data-sentiment="{{ yorum.ai_karari }}">
+                            <div class="rv-avatar">{{ yorum.kullanici_adi|slice:":1"|upper }}</div>
+                            <div class="rv-content">
+                                <div class="rv-head">
+                                    <span class="rv-author">{{ yorum.kullanici_adi }}</span>
+                                    <span class="rv-date">{{ yorum.tarih|date:"d M Y" }}</span>
+                                </div>
+                                {% if yorum.ai_karari == 'OLUMLU' %}
+                                <span class="rv-badge pos"><i class="fa-solid fa-thumbs-up"></i> Olumlu</span>
+                                {% elif yorum.ai_karari == 'OLUMSUZ' %}
+                                <span class="rv-badge neg"><i class="fa-solid fa-thumbs-down"></i> Olumsuz</span>
+                                {% else %}
+                                <span class="rv-badge neu"><i class="fa-solid fa-scale-balanced"></i> Nötr</span>
+                                {% endif %}
+                                <p class="rv-text">{{ yorum.icerik }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div id="emptyMsg" class="rv-empty">
+                            <i class="fa-regular fa-comment-dots"></i>
+                            <p>Henüz yorum yapılmamış. İlk yorumu sen yap.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
 
-    </div>
+        <!-- RIGHT COLUMN: AI -->
+        <aside>
+            <div class="ai-dashboard">
+                <div class="ai-header">
+                    <div class="ai-header-icon"><i class="fa-solid fa-brain"></i></div>
+                    <div class="ai-header-text">
+                        <h3>AI Analizi</h3>
+                        <p>Gerçek zamanlı duygu dağılımı</p>
+                    </div>
+                </div>
 
-    <!-- SAĞ KOLON (İstatistikler) -->
-    <div class="col-lg-4">
-        <h3 class="section-title">AI Analizi</h3>
-        <div class="stats-dashboard">
-            <div class="stat-card">
-                <div class="stat-icon icon-pos"><i class="fa-solid fa-thumbs-up"></i></div>
-                <div class="stat-data">
-                    <h3 id="stat-pos">{{ stats.pos }}</h3>
-                    <p>OLUMLU</p>
+                <div class="ai-stats">
+                    <div class="ai-stat pos">
+                        <div class="ai-stat-num" id="stat-pos">{{ stats.pos }}</div>
+                        <div class="ai-stat-label">Olumlu</div>
+                    </div>
+                    <div class="ai-stat neg">
+                        <div class="ai-stat-num" id="stat-neg">{{ stats.neg }}</div>
+                        <div class="ai-stat-label">Olumsuz</div>
+                    </div>
+                    <div class="ai-stat neu">
+                        <div class="ai-stat-num" id="stat-neu">{{ stats.neu }}</div>
+                        <div class="ai-stat-label">Nötr</div>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon icon-neg"><i class="fa-solid fa-thumbs-down"></i></div>
-                <div class="stat-data">
-                    <h3 id="stat-neg">{{ stats.neg }}</h3>
-                    <p>OLUMSUZ</p>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon icon-neu"><i class="fa-solid fa-scale-balanced"></i></div>
-                <div class="stat-data">
-                    <h3 id="stat-neu">{{ stats.neu }}</h3>
-                    <p>NÖTR</p>
-                </div>
-            </div>
-        </div>
 
-        <div class="bg-dark p-3 rounded border border-secondary mt-3">
-            <h6 class="text-white mb-2"><i class="fa-solid fa-circle-info text-warning"></i> Nasıl Çalışır?</h6>
-            <p class="small text-secondary m-0">
-                Yapay zeka (AI) yorumları analiz ederek filmin genel duygu durumunu çıkarır. Argo veya anlamsız yorumlar
-                otomatik olarak filtrelenir.
-            </p>
-        </div>
+                {% if stats.total > 0 %}
+                <div class="ai-bar">
+                    <div class="ai-bar-pos" id="bar-pos" style="width: {{ stats.pos_pct }}%"></div>
+                    <div class="ai-bar-neu" id="bar-neu" style="width: {{ stats.neu_pct }}%"></div>
+                    <div class="ai-bar-neg" id="bar-neg" style="width: {{ stats.neg_pct }}%"></div>
+                </div>
+                {% endif %}
+
+                <div class="ai-info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Yorumlar BERT + TF-IDF hibrit modeli ile analiz edilir. Argo veya anlamsız metinler otomatik filtrelenir.
+                </div>
+            </div>
+        </aside>
+
     </div>
 </div>
 
@@ -527,45 +890,45 @@
 
 {% block extra_js %}
 <script>
-    // --- FRAGMAN OYNATICI ---
+(function() {
+    // ===== TRAILER MODAL =====
     const playBtn = document.getElementById('playTrailerBtn');
-    const videoContainer = document.getElementById('videoContainer');
-    const heroContent = document.getElementById('heroContentWrapper');
-    const iframe = document.getElementById('videoIframe');
+    const modal   = document.getElementById('videoModal');
+    const iframe  = document.getElementById('videoIframe');
     const closeBtn = document.getElementById('closeVideoBtn');
-    const heroSection = document.getElementById('heroSection');
 
-    if (playBtn && videoContainer) {
+    function openModal(url) {
+        iframe.src = url;
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+        iframe.src = '';
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    if (playBtn && modal) {
         playBtn.addEventListener('click', (e) => {
             e.preventDefault();
             const url = playBtn.getAttribute('data-url');
-            if (url) {
-                iframe.src = url;
-                // Geçiş efekti
-                heroContent.style.opacity = '0';
-                setTimeout(() => {
-                    heroContent.style.display = 'none';
-                    videoContainer.style.display = 'block';
-                    videoContainer.style.opacity = '1';
-                }, 200);
-            }
+            if (url) openModal(url);
         });
     }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            iframe.src = ''; // Videoyu durdur
-            videoContainer.style.display = 'none';
-            heroContent.style.display = 'block';
-            setTimeout(() => { heroContent.style.opacity = '1'; }, 50);
-        });
-    }
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
-    // --- FİLTRELEME & DİĞERLERİ ---
-    const btns = document.querySelectorAll('.fbtn');
-    btns.forEach(b => {
+    // Backdrop click to close
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+    // Escape key
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
+
+    // ===== FILTER =====
+    const fbtns = document.querySelectorAll('.filter-btn');
+    fbtns.forEach(b => {
         b.addEventListener('click', () => {
-            btns.forEach(x => x.classList.remove('active'));
+            fbtns.forEach(x => x.classList.remove('active'));
             b.classList.add('active');
             const f = b.getAttribute('data-filter');
             document.querySelectorAll('.review-item').forEach(item => {
@@ -574,18 +937,31 @@
         });
     });
 
-    // TOAST
+    // ===== TOAST =====
     function showToast(msg, type) {
         const t = document.getElementById('toast');
         t.innerHTML = msg;
+        t.className = type;
         t.style.display = 'block';
-        t.style.backgroundColor = type === 'error' ? '#3e1a1a' : '#1a3e1a';
-        t.style.color = type === 'error' ? '#ff8888' : '#88ff88';
-        t.style.border = type === 'error' ? '1px solid #ff4444' : '1px solid #44ff44';
-        setTimeout(() => { t.style.display = 'none'; }, 3000);
+        setTimeout(() => { t.style.display = 'none'; }, 3500);
     }
 
-    // AJAX POST
+    // ===== UPDATE STATS BAR =====
+    function updateBars(stats) {
+        const total = stats.pos + stats.neg + stats.neu;
+        if (total === 0) return;
+        const posPct = (stats.pos / total) * 100;
+        const negPct = (stats.neg / total) * 100;
+        const neuPct = (stats.neu / total) * 100;
+        const bp = document.getElementById('bar-pos');
+        const bn = document.getElementById('bar-neg');
+        const bu = document.getElementById('bar-neu');
+        if (bp) bp.style.width = posPct + '%';
+        if (bn) bn.style.width = negPct + '%';
+        if (bu) bu.style.width = neuPct + '%';
+    }
+
+    // ===== AJAX SUBMIT =====
     const form = document.getElementById('reviewForm');
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -593,10 +969,13 @@
             const btn = document.getElementById('reviewBtn');
             const txt = document.getElementById('reviewText');
 
-            if (txt.value.trim().length < 3) { showToast('Yorum en az 3 karakter olmalı.', 'error'); return; }
+            if (txt.value.trim().length < 3) {
+                showToast('Yorum en az 3 karakter olmalı.', 'error');
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gönderiliyor...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analiz ediliyor...';
 
             try {
                 const fd = new FormData(form);
@@ -608,30 +987,25 @@
                 const data = await res.json();
 
                 if (!data.ok) {
-                    showToast(data.error || 'Hata oluştu', 'error');
+                    showToast(data.error || 'Bir hata oluştu.', 'error');
                 } else {
-                    showToast('✅ Yorumunuz eklendi!', 'success');
-
+                    showToast('Yorumunuz eklendi.', 'success');
                     const y = data.yorum;
+                    const sentLower = y.sent_key;
+                    const badgeIcon = sentLower === 'pos' ? 'thumbs-up' : sentLower === 'neg' ? 'thumbs-down' : 'scale-balanced';
+
                     const html = `
-                    <div class="review-item d-flex gap-3 mb-3 p-3 rounded border border-secondary"
-                         data-sentiment="${y.ai_karari}"
-                         style="background-color: #111 !important; color: #fff;">
-                        <div class="user-avatar d-flex align-items-center justify-content-center rounded-circle bg-warning text-dark fw-bold"
-                             style="width: 50px; height: 50px; font-size: 1.2rem; flex-shrink: 0;">
-                            ${y.avatar}
-                        </div>
-                        <div class="w-100">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <strong class="text-white">${y.kullanici}</strong>
-                                <small class="text-secondary">${y.tarih}</small>
+                        <div class="review-item" data-sentiment="${y.ai_karari}">
+                            <div class="rv-avatar">${y.avatar}</div>
+                            <div class="rv-content">
+                                <div class="rv-head">
+                                    <span class="rv-author">${y.kullanici}</span>
+                                    <span class="rv-date">${y.tarih}</span>
+                                </div>
+                                <span class="rv-badge ${sentLower}"><i class="fa-solid fa-${badgeIcon}"></i> ${y.badge_text}</span>
+                                <p class="rv-text">${y.icerik}</p>
                             </div>
-                            <div class="mb-2">
-                                <span class="${y.badge_cls} px-3 py-2 rounded-pill">${y.badge_text}</span>
-                            </div>
-                            <p class="m-0" style="color: #eee; font-size:0.95rem; line-height: 1.5;">${y.icerik}</p>
-                        </div>
-                    </div>`;
+                        </div>`;
 
                     document.getElementById('reviewsList').insertAdjacentHTML('afterbegin', html);
                     const empty = document.getElementById('emptyMsg');
@@ -640,18 +1014,20 @@
                     document.getElementById('stat-pos').innerText = data.stats.pos;
                     document.getElementById('stat-neg').innerText = data.stats.neg;
                     document.getElementById('stat-neu').innerText = data.stats.neu;
+                    updateBars(data.stats);
 
                     txt.value = '';
                 }
 
             } catch (err) {
                 console.error(err);
-                showToast('Sunucu hatası.', 'error');
+                showToast('Sunucu hatası oluştu.', 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Yorum Gönder';
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Yorum Gönder';
             }
         });
     }
+})();
 </script>
 {% endblock %}

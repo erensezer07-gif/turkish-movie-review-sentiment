@@ -1,40 +1,30 @@
 import logging
-import random
-
+import re
 
 from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 
 from .forms import UserRegisterForm
 from .models import Film, Yorum
-
-# Services
 from .services.moderation_service import kufur_kontrol, anlamsiz_mi
 from .services.sentiment_service import analyze_comment, get_sentiment_badge
 from .services.tmdb_service import fetch_movie_details
 
+logger = logging.getLogger(__name__)
 
-
-
+W_SIZE_RE = re.compile(r'/w\d+/')
 
 
 # --- 1. CANLI ARAMA API (SPOTIFY TARZI) ---
 def live_search(request):
-    """
-    Navbar'daki anlık arama kutusu için JSON döner.
-    Spotify tarzı hızlı sonuç gösterimi sağlar.
-    """
+    """Navbar'daki anlık arama kutusu için JSON döner."""
     term = request.GET.get("term", "").strip()
     results = []
 
     if len(term) > 1:
-        # Performans: DB seviyesinde arama yap
         filmler = Film.objects.filter(isim__icontains=term)[:10]
-
         for film in filmler:
             results.append({
                 "id": film.id,
@@ -48,19 +38,18 @@ def live_search(request):
 
 
 # --- 2. ANA SAYFA (FİLTRELEME & SIRALAMA) ---
-@login_required
 def anasayfa(request):
     """
-    Ana sayfa:
+    Ana sayfa (public):
     - Varsayılan: Dashboard Modu (Hero, Popüler, Yeni, Kategoriler)
-    - Arama/Filtre: Grid Modu (Mevcut yapı)
+    - Arama/Filtre: Grid Modu
     """
     q = request.GET.get("q", "").strip()
     kategori = request.GET.get("kategori", "")
     sirala = request.GET.get("sirala", "")
     mode_param = request.GET.get("mode", "")
 
-    # FİLTRELEME MODU (Eski Grid Yapısı)
+    # FİLTRELEME MODU
     if q or kategori or sirala or mode_param == "liste":
         filmler = Film.objects.all()
         if kategori:
@@ -71,7 +60,7 @@ def anasayfa(request):
             filmler = filmler.order_by("-yil")
         else:
             filmler = filmler.order_by("-id")
-        
+
         if q:
             filmler = filmler.filter(isim__icontains=q).distinct()
 
@@ -82,46 +71,48 @@ def anasayfa(request):
             "secili_kategori": kategori,
         })
 
-    # DASHBOARD MODU (Netflix Style)
-    else:
-        # 1. Hero Section: Fragmanı olan & Puanı > 6.5 olan filmler (Carousel için)
-        # Filtre: Fragman var VE Puan > 6.5
-        hero_candidates = list(Film.objects.filter(
-            Q(fragman_url__isnull=False) & ~Q(fragman_url="") & Q(puan__gt=6.5)
-        ))
-        
-        # Rastgele 5 tane seç (yoksa hepsini al)
-        hero_movies = random.sample(hero_candidates, min(len(hero_candidates), 5))
+    # DASHBOARD MODU
+    hero_movies = list(
+        Film.objects.filter(
+            Q(fragman_url__isnull=False) & ~Q(fragman_url="") & Q(puan__gt=7.5)
+        ).order_by("?")[:5]
+    )
+    for movie in hero_movies:
+        movie.poster_url_hd = (
+            W_SIZE_RE.sub('/original/', movie.poster_url) if movie.poster_url else ""
+        )
 
-        # HD Poster URL oluştur (w500 vb. -> original)
-        import re
-        for movie in hero_movies:
-            if movie.poster_url:
-                # /w500/, /w300/, etc. -> /original/
-                movie.poster_url_hd = re.sub(r'/w\d+/', '/original/', movie.poster_url)
-            else:
-                movie.poster_url_hd = ""
+    # Kategori section'ları (sırasıyla)
+    sections = [
+        ("popular", "En Yüksek Puanlılar", "fa-star",
+            Film.objects.filter(puan__gt=0).order_by("-puan")[:18]),
+        ("newest", "Yeni Eklenenler", "fa-bolt",
+            Film.objects.all().order_by("-id")[:18]),
+        ("action", "Aksiyon", "fa-fire",
+            Film.objects.filter(turler__icontains="Aksiyon").order_by("-puan")[:18]),
+        ("drama", "Dram", "fa-masks-theater",
+            Film.objects.filter(turler__icontains="Dram").order_by("-puan")[:18]),
+        ("comedy", "Komedi", "fa-face-laugh-squint",
+            Film.objects.filter(turler__icontains="Komedi").order_by("-puan")[:18]),
+        ("scifi", "Bilim Kurgu", "fa-rocket",
+            Film.objects.filter(turler__icontains="Bilim-Kurgu").order_by("-puan")[:18]),
+        ("thriller", "Gerilim", "fa-bolt-lightning",
+            Film.objects.filter(turler__icontains="Gerilim").order_by("-puan")[:18]),
+        ("horror", "Korku", "fa-ghost",
+            Film.objects.filter(turler__icontains="Korku").order_by("-puan")[:18]),
+        ("animation", "Animasyon", "fa-child-reaching",
+            Film.objects.filter(turler__icontains="Animasyon").order_by("-puan")[:18]),
+        ("adventure", "Macera", "fa-mountain",
+            Film.objects.filter(turler__icontains="Macera").order_by("-puan")[:18]),
+        ("romance", "Romantik", "fa-heart",
+            Film.objects.filter(turler__icontains="Romantik").order_by("-puan")[:18]),
+    ]
 
-        # 2. Popüler (IMDb Puanına Göre)
-        popular_movies = Film.objects.all().order_by("-puan")[:15]
-
-        # 3. Yeni Eklenenler (ID'ye göre)
-        new_arrivals = Film.objects.all().order_by("-id")[:15]
-
-        # 4. Kategori Bazlı Listeler
-        action_movies = Film.objects.filter(turler__icontains="Aksiyon")[:10]
-        comedy_movies = Film.objects.filter(turler__icontains="Komedi")[:10]
-        horror_movies = Film.objects.filter(turler__icontains="Korku")[:10]
-
-        return render(request, "anasayfa.html", {
-            "mode": "dashboard",
-            "hero_movies": hero_movies,
-            "popular": popular_movies,
-            "newest": new_arrivals,
-            "action": action_movies,
-            "comedy": comedy_movies,
-            "horror": horror_movies,
-        })
+    return render(request, "anasayfa.html", {
+        "mode": "dashboard",
+        "hero_movies": hero_movies,
+        "sections": sections,
+    })
 
 
 # --- 3. KAYIT OLMA SİSTEMİ ---
@@ -139,8 +130,7 @@ def kayit_ol(request):
                 f"Hesabınız başarıyla oluşturuldu, {user.username}! Giriş yapabilirsiniz.",
             )
             return redirect("login")
-        else:
-            messages.error(request, "Kayıt hatası. Bilgileri kontrol edin.")
+        messages.error(request, "Kayıt hatası. Bilgileri kontrol edin.")
     else:
         form = UserRegisterForm()
 
@@ -148,19 +138,24 @@ def kayit_ol(request):
 
 
 # --- 4. FİLM DETAY VE AI ANALİZ ---
-@login_required
 def film_detay(request, film_id):
-    """Film detay sayfası: bilgiler, fragman, AI duygu analizi."""
+    """Film detay sayfası: bilgiler, fragman, AI duygu analizi.
+    Görüntüleme public; yorum gönderme login gerektirir.
+    """
     film = get_object_or_404(Film, id=film_id)
-
-    # --- AJAX mi kontrol ---
     is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
 
-    # Yorum Gönderme
     if request.method == "POST":
+        # Yorum gönderme login zorunlu
+        if not request.user.is_authenticated:
+            msg = "Yorum yapabilmek için giriş yapmalısınız."
+            if is_ajax:
+                return JsonResponse({"ok": False, "error": msg, "login_required": True}, status=401)
+            messages.warning(request, msg)
+            return redirect("login")
+
         gelen_yorum = request.POST.get("yorum_icerigi", "").strip()
 
-        # 🚫 Küfür kontrolü
         if kufur_kontrol(gelen_yorum):
             msg = "⛔ Yorumunuz uygunsuz ifade içeriyor. Lütfen saygılı bir dil kullanın."
             if is_ajax:
@@ -175,7 +170,6 @@ def film_detay(request, film_id):
             messages.warning(request, msg)
             return redirect("film_detay", film_id=film.id)
 
-        # 🚫 Anlamsız metin kontrolü
         if anlamsiz_mi(gelen_yorum):
             msg = "⛔ Yorumunuz anlamlı bir metin içermiyor. Lütfen gerçek bir yorum yazın."
             if is_ajax:
@@ -183,13 +177,11 @@ def film_detay(request, film_id):
             messages.error(request, msg)
             return redirect("film_detay", film_id=film.id)
 
-        # AI Analiz
         sentiment_result = analyze_comment(gelen_yorum)
         ai_karar = sentiment_result["decision"]
         ai_guven = sentiment_result["confidence"]
         ai_kaynak = sentiment_result["source"]
 
-        # Yorum Kaydet
         yeni_yorum = Yorum.objects.create(
             film=film,
             kullanici_adi=request.user.username,
@@ -200,10 +192,7 @@ def film_detay(request, film_id):
         )
 
         if is_ajax:
-            # Badge bilgisi
             badge = get_sentiment_badge(ai_karar)
-
-            # Güncel istatistikler
             yorumlar_qs = film.yorumlar.all()
             total = yorumlar_qs.count()
             pos = yorumlar_qs.filter(ai_karari="OLUMLU").count()
@@ -233,7 +222,6 @@ def film_detay(request, film_id):
         messages.success(request, "Yorumunuz kaydedildi.")
         return redirect("film_detay", film_id=film.id)
 
-    # Yorumlar & İstatistikler
     yorumlar = film.yorumlar.all().order_by("-tarih")
     total = yorumlar.count()
     pos = yorumlar.filter(ai_karari="OLUMLU").count()
@@ -250,7 +238,6 @@ def film_detay(request, film_id):
         "neu_pct": round(neu / total * 100) if total else 0,
     }
 
-    # TMDB Ek Bilgiler
     tmdb_data = fetch_movie_details(film.isim, existing_trailer_url=film.fragman_url)
 
     return render(
@@ -267,16 +254,4 @@ def film_detay(request, film_id):
             "trailer_watch_url": tmdb_data["trailer_watch_url"],
         },
     )
-
-
-# --- 5. TOPLU FİLM EKLEME (YEDEK) ---
-@staff_member_required
-def toplu_film_ekle(request):
-    """Admin'i terminaldeki manage.py komutuna yönlendirir."""
-    messages.warning(
-        request, "Lütfen bu işlem için terminalden 'python manage.py film_cek' komutunu kullanın."
-    )
-    return redirect("anasayfa")
-
-
 

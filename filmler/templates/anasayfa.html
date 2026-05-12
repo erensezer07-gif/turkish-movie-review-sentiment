@@ -1,458 +1,831 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load youtube_filters %}
 
 {% block extra_css %}
 <style>
-    /* --- GENERAL SETTINGS --- */
-    :root {
-        --card-bg: #1a1a1a;
-        --card-hover-bg: #252525;
-        --text-color: #e0e0e0;
-        --accent-color: #f5c518;
-    }
+    /* ============================================
+       ANASAYFA — PROFESSIONAL CINEMA UI
+       ============================================ */
 
-    /* --- SIDEBAR --- */
-    .sidebar-sticky {
-        position: sticky;
-        top: 2rem;
-    }
-
-    .list-group-item {
-        background-color: #1a1a1a;
-        border-color: #333;
-        color: #ccc;
-        transition: all 0.2s;
-    }
-
-    .list-group-item:hover {
-        background-color: #333;
-        color: #fff;
-        padding-left: 20px;
-        /* Slide effect */
-    }
-
-    .list-group-header {
-        color: var(--accent-color);
-        font-weight: 700;
-        text-transform: uppercase;
-        margin-bottom: 10px;
-        font-size: 0.9rem;
-        letter-spacing: 1px;
-    }
-
-    /* --- MODERN GRID LAYOUT (Updated Density) --- */
-    .category-section {
-        margin-bottom: 3rem;
-    }
-
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #fff;
-        margin-bottom: 1.5rem;
-        border-left: 4px solid var(--accent-color);
-        padding-left: 15px;
-        text-transform: uppercase;
-    }
-
-    .modern-grid {
+    .page-shell {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        /* Optimized density */
-        gap: 20px;
-    }
-
-    .movie-card-modern {
-        background: transparent;
-        overflow: visible;
-        /* Prepare for hover lift */
-        position: relative;
-        transition: transform 0.3s ease;
-    }
-
-    .movie-card-modern:hover {
-        transform: translateY(-5px);
-        z-index: 2;
-    }
-
-    .poster-wrapper {
-        position: relative;
-        border-radius: 8px;
-        /* Slightly round */
-        overflow: hidden;
-        aspect-ratio: 2/3;
-        /* Vertical poster */
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    }
-
-    .poster-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-
-    .movie-card-modern:hover .poster-wrapper img {
-        transform: scale(1.05);
-        /* Subtle zoom */
-        filter: brightness(0.4);
-        /* Darken for button visibility */
-    }
-
-    .rating-tag {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: var(--accent-color);
-        color: #000;
-        font-weight: 800;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        z-index: 5;
-    }
-
-    /* Center Button on Poster */
-    .hover-actions {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-
-    .movie-card-modern:hover .hover-actions {
-        opacity: 1;
-    }
-
-    .btn-glow {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(5px);
-        border: 1px solid #fff;
-        color: #fff;
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-
-    .btn-glow:hover {
-        background: #fff;
-        color: #000;
-        transform: scale(1.1);
-    }
-
-    .movie-info-below {
-        padding-top: 10px;
-    }
-
-    .movie-info-below h3 {
-        color: #fff;
-        font-size: 0.95rem;
-        font-weight: 600;
-        margin: 0 0 3px 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .movie-info-below p {
-        color: #999;
-        font-size: 0.8rem;
-        margin: 0;
-    }
-
-    /* --- HERO REFINEMENT (TAM OTURT) --- */
-    .hero-bg-blur {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        filter: blur(50px) brightness(0.2);
-        z-index: 1;
-        transform: scale(1.1);
-        /* Prevent white edges from blur */
-    }
-
-    .hero-content-wrapper {
-        position: relative;
-        z-index: 5;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        padding: 0 6%;
-    }
-
-    .hero-sharp-poster {
-        height: 85%;
-        max-height: 520px;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        z-index: 10;
-        transition: transform 0.3s ease;
-    }
-
-    .hero-sharp-poster:hover {
-        transform: scale(1.02);
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 32px;
+        padding-top: 24px;
     }
 
     @media (max-width: 991px) {
-        .hero-sharp-poster {
-            display: none;
-            /* Hide poster on mobile for text space */
-        }
+        .page-shell { grid-template-columns: 1fr; gap: 16px; }
+        .sidebar { display: none; }
+    }
+
+    /* ---------- SIDEBAR ---------- */
+    .sidebar {
+        position: sticky;
+        top: 80px;
+        align-self: start;
+        max-height: calc(100vh - 100px);
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar { width: 4px; }
+
+    .nav-group {
+        margin-bottom: 24px;
+    }
+
+    .nav-group-title {
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        padding: 0 12px;
+        margin-bottom: 8px;
+    }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 9px 12px;
+        border-radius: 8px;
+        color: var(--text-dim);
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all .15s ease;
+        position: relative;
+    }
+
+    .nav-item:hover {
+        background: var(--bg-elev);
+        color: var(--text);
+    }
+
+    .nav-item.active {
+        background: var(--bg-elev-2);
+        color: var(--text);
+    }
+
+    .nav-item.active::before {
+        content: '';
+        position: absolute;
+        left: -12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 3px;
+        height: 18px;
+        background: var(--accent);
+        border-radius: 0 3px 3px 0;
+    }
+
+    .nav-item .nav-icon {
+        width: 18px;
+        font-size: 0.95rem;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .nav-item .nav-count {
+        margin-left: auto;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        background: var(--bg-elev);
+        padding: 2px 8px;
+        border-radius: 100px;
+        font-weight: 600;
+    }
+
+    .nav-item:hover .nav-count {
+        background: var(--bg-elev-2);
+    }
+
+    /* ---------- HERO ---------- */
+    .hero {
+        position: relative;
+        height: 540px;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 48px;
+        background: var(--bg-elev);
+    }
+
+    .hero-slide {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity .8s ease;
+    }
+
+    .hero-slide.active { opacity: 1; }
+
+    .hero-bg-img {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center 25%;
+        filter: blur(0);
+    }
+
+    .hero-gradient {
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, rgba(11,11,15,0.95) 0%, rgba(11,11,15,0.7) 40%, rgba(11,11,15,0.3) 70%, rgba(11,11,15,0.6) 100%),
+            linear-gradient(180deg, transparent 50%, rgba(11,11,15,0.95) 100%);
+    }
+
+    .hero-content {
+        position: relative;
+        height: 100%;
+        z-index: 5;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        align-items: center;
+        gap: 40px;
+        padding: 0 56px;
+    }
+
+    @media (max-width: 768px) {
+        .hero { height: 480px; }
+        .hero-content { grid-template-columns: 1fr; padding: 24px; }
+        .hero-poster-art { display: none; }
+    }
+
+    .hero-text { max-width: 580px; }
+
+    .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 12px;
+        background: rgba(245, 197, 24, 0.12);
+        border: 1px solid rgba(245, 197, 24, 0.3);
+        border-radius: 100px;
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 16px;
+    }
+
+    .hero-title {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 800;
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        margin: 0 0 16px;
+        text-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-meta {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+
+    .hero-meta .imdb-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--accent);
+        color: #000;
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+
+    .hero-meta .dot { color: var(--text-muted); }
+
+    .hero-overview {
+        color: #d1d1da;
+        line-height: 1.6;
+        font-size: 0.95rem;
+        margin-bottom: 28px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-hero-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 24px;
+        background: var(--text);
+        color: #000;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        transition: all .2s;
+    }
+    .btn-hero-primary:hover {
+        background: var(--accent);
+        color: #000;
+        transform: translateY(-1px);
+    }
+
+    .btn-hero-ghost {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 24px;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        backdrop-filter: blur(8px);
+        transition: all .2s;
+    }
+    .btn-hero-ghost:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: var(--text);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .hero-poster-art {
+        justify-self: end;
+        max-height: 420px;
+        aspect-ratio: 2/3;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+        object-fit: cover;
+    }
+
+    /* Hero indicators */
+    .hero-indicators {
+        position: absolute;
+        bottom: 24px;
+        left: 56px;
+        display: flex;
+        gap: 6px;
+        z-index: 6;
+    }
+
+    .hero-dot {
+        width: 24px;
+        height: 3px;
+        border-radius: 100px;
+        background: rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all .25s;
+        border: none;
+        padding: 0;
+    }
+
+    .hero-dot.active {
+        background: var(--accent);
+        width: 36px;
+    }
+
+    /* Hero arrows (manuel geçiş) */
+    .hero-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: rgba(11, 11, 15, 0.55);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text);
+        cursor: pointer;
+        z-index: 7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all .2s;
+        opacity: 0.6;
+    }
+
+    .hero-arrow:hover {
+        opacity: 1;
+        background: rgba(245, 197, 24, 0.2);
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateY(-50%) scale(1.06);
+    }
+
+    .hero-arrow.prev { left: 16px; }
+    .hero-arrow.next { right: 16px; }
+
+    @media (max-width: 768px) {
+        .hero-arrow { width: 40px; height: 40px; }
+        .hero-arrow.prev { left: 8px; }
+        .hero-arrow.next { right: 8px; }
+        .hero-indicators { left: 24px; bottom: 16px; }
+    }
+
+    /* ---------- SECTIONS ---------- */
+    .section { margin-bottom: 56px; }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .section-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 700;
+        font-size: 1.4rem;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+
+    .section-link {
+        margin-left: auto;
+        font-size: 0.85rem;
+        color: var(--text-dim);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color .2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .section-link:hover { color: var(--accent); }
+
+    /* ---------- CAROUSEL ROW ---------- */
+    .row-scroller-wrap {
+        position: relative;
+    }
+
+    .row-scroller {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        padding: 4px 4px 12px;
+        scroll-behavior: smooth;
+    }
+
+    .row-scroller::-webkit-scrollbar { display: none; }
+
+    .scroll-btn {
+        position: absolute;
+        top: 30%;
+        transform: translateY(-50%);
+        width: 42px;
+        height: 58px;
+        background: rgba(11, 11, 15, 0.9);
+        border: 1px solid var(--line);
+        color: var(--text);
+        border-radius: 8px;
+        cursor: pointer;
+        z-index: 4;
+        opacity: 0;
+        transition: opacity .2s, background .15s;
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .row-scroller-wrap:hover .scroll-btn { opacity: 1; }
+    .scroll-btn:hover { background: var(--bg-elev-2); border-color: var(--accent); color: var(--accent); }
+    .scroll-btn.prev { left: -10px; }
+    .scroll-btn.next { right: -10px; }
+
+    /* ---------- POSTER CARD ---------- */
+    .pc {
+        position: relative;
+        flex: 0 0 calc((100% - (6 * 14px)) / 7);
+        min-width: 0;
+        scroll-snap-align: start;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    @media (max-width: 1399px) { .pc { flex: 0 0 calc((100% - (5 * 14px)) / 6); } }
+    @media (max-width: 1199px) { .pc { flex: 0 0 calc((100% - (4 * 14px)) / 5); } }
+    @media (max-width: 991px)  { .pc { flex: 0 0 calc((100% - (3 * 14px)) / 4); } }
+    @media (max-width: 767px)  { .pc { flex: 0 0 calc((100% - (2 * 14px)) / 3); } }
+    @media (max-width: 479px)  { .pc { flex: 0 0 calc((100% - 14px) / 2); } }
+
+    .pc-poster {
+        position: relative;
+        aspect-ratio: 2/3;
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--bg-elev);
+        border: 1px solid var(--line);
+        transition: all .25s ease;
+    }
+
+    .pc:hover .pc-poster {
+        transform: translateY(-4px);
+        border-color: var(--line-2);
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+    }
+
+    .pc-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .35s ease;
+    }
+
+    .pc:hover .pc-poster img {
+        transform: scale(1.04);
+    }
+
+    .pc-rating {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: rgba(11, 11, 15, 0.85);
+        backdrop-filter: blur(8px);
+        color: var(--text);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .pc-rating i { color: var(--accent); font-size: 0.7rem; }
+
+    .pc-info { padding-top: 12px; }
+
+    .pc-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        line-height: 1.3;
+        color: var(--text);
+        margin: 0 0 4px;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .pc-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    /* ---------- SEARCH RESULTS GRID ---------- */
+    .search-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 20px;
+    }
+
+    .search-header {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 24px;
+        padding-top: 8px;
+    }
+
+    .search-header h2 {
+        font-family: 'Manrope', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 0;
+        letter-spacing: -0.02em;
+    }
+
+    .search-header span {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        color: var(--line-2);
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="container-xl">
+    <div class="page-shell">
 
-<!-- 2-COLUMN LAYOUT -->
-<div class="container-fluid pt-4" style="background-color: #141414;">
-    <div class="row">
-
-        <!-- LEFT SIDEBAR -->
-        <div class="col-lg-2 col-md-3 d-none d-md-block">
-            <div class="sidebar-sticky">
-
-                <!-- Categories -->
-                <div class="mb-4">
-                    <div class="list-group-header"><i class="fa-solid fa-layer-group me-2"></i> KATEGORİLER</div>
-                    <div class="list-group list-group-flush rounded">
-                        <a href="{% url 'anasayfa' %}?mode=liste" class="list-group-item list-group-item-action">🔥 Tümü</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Aksiyon"
-                            class="list-group-item list-group-item-action">💥 Aksiyon</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Komedi" class="list-group-item list-group-item-action">😂 Komedi</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Korku" class="list-group-item list-group-item-action">👻 Korku</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Bilim-Kurgu"
-                            class="list-group-item list-group-item-action">🚀 Bilim Kurgu</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Macera" class="list-group-item list-group-item-action">🌍 Macera</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Dram" class="list-group-item list-group-item-action">🎭 Dram</a>
-                        <a href="{% url 'anasayfa' %}?kategori=Romantik"
-                            class="list-group-item list-group-item-action">❤️ Romantik</a>
-                    </div>
-                </div>
-
-                <!-- Sort -->
-                <div class="mb-4">
-                    <div class="list-group-header"><i class="fa-solid fa-sort me-2"></i> SIRALA</div>
-                    <div class="list-group list-group-flush rounded">
-                        <a href="{% url 'anasayfa' %}?sirala=puan" class="list-group-item list-group-item-action">⭐ En Yüksek Puan</a>
-                        <a href="{% url 'anasayfa' %}?sirala=yeni" class="list-group-item list-group-item-action">🆕 En Yeni Filmler</a>
-                    </div>
-                </div>
-
+        <!-- ============== SIDEBAR ============== -->
+        <aside class="sidebar">
+            <div class="nav-group">
+                <div class="nav-group-title">Keşfet</div>
+                <a href="{% url 'anasayfa' %}" class="nav-item {% if mode == 'dashboard' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-house"></i></span>
+                    <span>Anasayfa</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?mode=liste" class="nav-item {% if mode == 'search' and not secili_kategori %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-grip"></i></span>
+                    <span>Tüm Filmler</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?sirala=puan" class="nav-item">
+                    <span class="nav-icon"><i class="fa-solid fa-trophy"></i></span>
+                    <span>En Yüksek Puan</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?sirala=yeni" class="nav-item">
+                    <span class="nav-icon"><i class="fa-solid fa-clock"></i></span>
+                    <span>Yeni Çıkanlar</span>
+                </a>
             </div>
-        </div>
 
+            <div class="nav-group">
+                <div class="nav-group-title">Kategoriler</div>
+                <a href="{% url 'anasayfa' %}?kategori=Aksiyon" class="nav-item {% if secili_kategori == 'Aksiyon' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-fire"></i></span>
+                    <span>Aksiyon</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Dram" class="nav-item {% if secili_kategori == 'Dram' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-masks-theater"></i></span>
+                    <span>Dram</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Komedi" class="nav-item {% if secili_kategori == 'Komedi' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-face-laugh-squint"></i></span>
+                    <span>Komedi</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Korku" class="nav-item {% if secili_kategori == 'Korku' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-ghost"></i></span>
+                    <span>Korku</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Bilim-Kurgu" class="nav-item {% if secili_kategori == 'Bilim-Kurgu' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-rocket"></i></span>
+                    <span>Bilim Kurgu</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Macera" class="nav-item {% if secili_kategori == 'Macera' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-mountain"></i></span>
+                    <span>Macera</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Gerilim" class="nav-item {% if secili_kategori == 'Gerilim' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-bolt-lightning"></i></span>
+                    <span>Gerilim</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Romantik" class="nav-item {% if secili_kategori == 'Romantik' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-heart"></i></span>
+                    <span>Romantik</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Animasyon" class="nav-item {% if secili_kategori == 'Animasyon' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-child-reaching"></i></span>
+                    <span>Animasyon</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Fantastik" class="nav-item {% if secili_kategori == 'Fantastik' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-wand-sparkles"></i></span>
+                    <span>Fantastik</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Aile" class="nav-item {% if secili_kategori == 'Aile' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-people-roof"></i></span>
+                    <span>Aile</span>
+                </a>
+                <a href="{% url 'anasayfa' %}?kategori=Belgesel" class="nav-item {% if secili_kategori == 'Belgesel' %}active{% endif %}">
+                    <span class="nav-icon"><i class="fa-solid fa-circle-info"></i></span>
+                    <span>Belgesel</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ============== MAIN ============== -->
+        <main>
         {% if mode == 'dashboard' %}
-        <div class="col-lg-10 col-md-9">
 
             {% if hero_movies %}
-            <!-- HERO CAROUSEL -->
-            <div id="heroCarousel" class="carousel slide mb-5 rounded-3 overflow-hidden shadow-lg position-relative"
-                data-bs-ride="carousel" style="height: 600px; background: #000;">
-
-                <div class="carousel-inner w-100 h-100">
-                    {% for movie in hero_movies %}
-                    <div class="carousel-item w-100 h-100 {% if forloop.first %}active{% endif %}"
-                        data-bs-interval="6000">
-
-                        <!-- Layer 1: Blurred Backdrop -->
-                        <img src="{{ movie.poster_url_hd|default:movie.poster_url }}" class="hero-bg-blur" alt="">
-
-                        <!-- Layer 2: Content Overlay -->
-                        <div class="hero-content-wrapper row g-0">
-                            <!-- Left: Text Info -->
-                            <div class="col-lg-7 d-flex flex-column justify-content-center text-white">
-                                <h1 class="display-3 fw-bold mb-3 text-uppercase"
-                                    style="font-family: 'Montserrat', sans-serif; text-shadow: 2px 2px 10px rgba(0,0,0,0.8);">
-                                    {{ movie.isim }}
-                                </h1>
-
-                                <div class="mb-4 d-flex align-items-center gap-3">
-                                    <span class="badge bg-warning text-dark fs-5 fw-bold px-3 py-2">IMDb {{ movie.puan }}</span>
-                                    <span class="fs-4 fw-bold">{{ movie.yil }}</span>
-                                    <span class="border-start border-secondary ps-3 ms-1 fs-5 text-light opacity-75">{{ movie.turler }}</span>
-                                </div>
-
-                                <p class="lead mb-5 opacity-90"
-                                    style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 600px;">
-                                    {{ movie.konu }}
-                                </p>
-
-                                <div>
-                                    <a href="{% url 'film_detay' movie.id %}"
-                                        class="btn btn-light btn-lg px-5 py-3 fw-bold rounded-pill hover-scale shadow-lg">
-                                        <i class="fa-solid fa-circle-info me-2"></i> DAHA FAZLA
-                                    </a>
-                                </div>
+            <section class="hero" id="hero">
+                {% for m in hero_movies %}
+                <div class="hero-slide {% if forloop.first %}active{% endif %}" data-idx="{{ forloop.counter0 }}">
+                    <div class="hero-bg-img" style="background-image: url('{{ m.poster_url_hd|default:m.poster_url }}');"></div>
+                    <div class="hero-gradient"></div>
+                    <div class="hero-content">
+                        <div class="hero-text">
+                            <div class="hero-tag"><i class="fa-solid fa-fire"></i> Öne Çıkan</div>
+                            <h1 class="hero-title">{{ m.isim }}</h1>
+                            <div class="hero-meta">
+                                <span class="imdb-pill"><i class="fa-solid fa-star"></i> {{ m.puan }}</span>
+                                <span>{{ m.yil }}</span>
+                                <span class="dot">•</span>
+                                <span>{{ m.turler|truncatechars:40 }}</span>
                             </div>
-
-                            <!-- Right: Sharp Poster (TAM OTURT) -->
-                            <div class="col-lg-5 d-none d-lg-flex justify-content-center align-items-center">
-                                <img src="{{ movie.poster_url_hd|default:movie.poster_url }}" class="hero-sharp-poster" style="object-fit: contain; max-width: 100%;"
-                                    alt="{{ movie.isim }}">
+                            <p class="hero-overview">{{ m.konu|default:"Açıklama mevcut değil." }}</p>
+                            <div class="hero-actions">
+                                <a href="{% url 'film_detay' m.id %}" class="btn-hero-primary">
+                                    <i class="fa-solid fa-play"></i> Detayları Gör
+                                </a>
+                                {% with first_g=m.turler|split_by:","|first %}
+                                {% if first_g %}
+                                <a href="{% url 'anasayfa' %}?kategori={{ first_g }}" class="btn-hero-ghost">
+                                    <i class="fa-solid fa-layer-group"></i> Benzer Filmler
+                                </a>
+                                {% endif %}
+                                {% endwith %}
                             </div>
                         </div>
-
+                        <img src="{{ m.poster_url }}" class="hero-poster-art" alt="{{ m.isim }}" loading="eager">
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
 
-                <!-- Controls -->
-                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev"
-                    style="z-index: 20; width: 4%;">
-                    <span class="carousel-control-prev-icon"></span>
+                {% if hero_movies|length > 1 %}
+                <button class="hero-arrow prev" id="heroPrev" type="button" aria-label="Önceki">
+                    <i class="fa-solid fa-chevron-left"></i>
                 </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next"
-                    style="z-index: 20; width: 4%;">
-                    <span class="carousel-control-next-icon"></span>
+                <button class="hero-arrow next" id="heroNext" type="button" aria-label="Sonraki">
+                    <i class="fa-solid fa-chevron-right"></i>
                 </button>
-            </div>
-            {% endif %}
+                {% endif %}
 
-            <!-- POPULAR MOVIES -->
-            <section class="category-section">
-                <h2 class="section-title">🔥 Popüler Filmler</h2>
-                <div class="modern-grid">
-                    {% for film in popular %}
-                    <div class="movie-card-modern">
-                        <div class="poster-wrapper">
-                            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
-                            {% if film.puan > 0 %}
-                            <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
-                            {% endif %}
-                            <div class="hover-actions">
-                                <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
-                            </div>
-                        </div>
-                        <div class="movie-info-below">
-                            <h3>{{ film.isim }}</h3>
-                            <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <!-- NEW ARRIVALS -->
-            <section class="category-section">
-                <h2 class="section-title">🆕 Yeni Eklenenler</h2>
-                <div class="modern-grid">
-                    {% for film in newest %}
-                    <div class="movie-card-modern">
-                        <div class="poster-wrapper">
-                            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
-                            {% if film.puan > 0 %}
-                            <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
-                            {% endif %}
-                            <div class="hover-actions">
-                                <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
-                            </div>
-                        </div>
-                        <div class="movie-info-below">
-                            <h3>{{ film.isim }}</h3>
-                            <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </section>
-
-            <!-- CATEGORIES: ACTION -->
-            {% if action %}
-            <section class="category-section">
-                <h2 class="section-title">💥 Aksiyon</h2>
-                <div class="modern-grid">
-                    {% for film in action %}
-                    <div class="movie-card-modern">
-                        <div class="poster-wrapper">
-                            <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
-                            {% if film.puan > 0 %}
-                            <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
-                            {% endif %}
-                            <div class="hover-actions">
-                                <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
-                            </div>
-                        </div>
-                        <div class="movie-info-below">
-                            <h3>{{ film.isim }}</h3>
-                            <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
-                        </div>
-                    </div>
+                <div class="hero-indicators">
+                    {% for m in hero_movies %}
+                    <button class="hero-dot {% if forloop.first %}active{% endif %}" type="button" data-idx="{{ forloop.counter0 }}" aria-label="Slayt {{ forloop.counter }}"></button>
                     {% endfor %}
                 </div>
             </section>
             {% endif %}
 
-        </div> <!-- End Col-9 -->
+            {% for key, title, icon, films in sections %}
+            {% if films %}
+            <section class="section">
+                <div class="section-header">
+                    <div class="section-icon"><i class="fa-solid {{ icon }}"></i></div>
+                    <h2 class="section-title">{{ title }}</h2>
+                    {% if key != 'newest' and key != 'popular' %}
+                    <a href="{% url 'anasayfa' %}?kategori={{ title }}" class="section-link">
+                        Tümünü Gör <i class="fa-solid fa-arrow-right" style="font-size:0.7rem"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="row-scroller-wrap">
+                    <button class="scroll-btn prev" data-target="row-{{ key }}"><i class="fa-solid fa-chevron-left"></i></button>
+                    <div class="row-scroller" id="row-{{ key }}">
+                        {% for film in films %}
+                        <a href="{% url 'film_detay' film.id %}" class="pc">
+                            <div class="pc-poster">
+                                {% if film.puan and film.puan > 0 %}
+                                <span class="pc-rating"><i class="fa-solid fa-star"></i>{{ film.puan|floatformat:1 }}</span>
+                                {% endif %}
+                                <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy"
+                                     onerror="this.style.opacity='0.3'">
+                            </div>
+                            <div class="pc-info">
+                                <p class="pc-title">{{ film.isim }}</p>
+                                <p class="pc-sub">{{ film.yil }} · {{ film.turler|truncatechars:18 }}</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <button class="scroll-btn next" data-target="row-{{ key }}"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </section>
+            {% endif %}
+            {% endfor %}
 
         {% else %}
-        <!-- SEARCH RESULTS -->
-        <div class="col-lg-10 col-md-9">
-            <h2 class="mb-4 text-white">
-                {% if q %} Arama Sonuçları: "{{ q }}"
-                {% elif secili_kategori %} Kategori: {{ secili_kategori }}
-                {% else %} Tüm Filmler {% endif %}
-            </h2>
+            <!-- ============== SEARCH / FILTER MODE ============== -->
+            <div class="search-header">
+                <h2>
+                    {% if q %}"{{ q }}"
+                    {% elif secili_kategori %}{{ secili_kategori }}
+                    {% else %}Tüm Filmler{% endif %}
+                </h2>
+                <span>{{ filmler|length }} sonuç</span>
+            </div>
 
-            <div class="modern-grid">
+            <div class="search-grid">
                 {% for film in filmler %}
-                <div class="movie-card-modern">
-                    <div class="poster-wrapper">
-                        <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
-                        {% if film.puan > 0 %}
-                        <span class="rating-tag">{{ film.puan|floatformat:1 }}</span>
+                <a href="{% url 'film_detay' film.id %}" class="pc">
+                    <div class="pc-poster">
+                        {% if film.puan and film.puan > 0 %}
+                        <span class="pc-rating"><i class="fa-solid fa-star"></i>{{ film.puan|floatformat:1 }}</span>
                         {% endif %}
-                        <div class="hover-actions">
-                            <a href="{% url 'film_detay' film.id %}" class="btn-glow">İncele</a>
-                        </div>
+                        <img src="{{ film.poster_url }}" alt="{{ film.isim }}" loading="lazy">
                     </div>
-                    <div class="movie-info-below">
-                        <h3>{{ film.isim }}</h3>
-                        <p>{{ film.yil }} • {{ film.turler|truncatechars:20 }}</p>
+                    <div class="pc-info">
+                        <p class="pc-title">{{ film.isim }}</p>
+                        <p class="pc-sub">{{ film.yil }} · {{ film.turler|truncatechars:18 }}</p>
                     </div>
-                </div>
+                </a>
                 {% empty %}
-                <div class="col-12">
-                    <p class="text-white-50">Film bulunamadı.</p>
+                <div class="empty-state">
+                    <i class="fa-solid fa-film"></i>
+                    <p>Aradığınız kriterlere uygun film bulunamadı.</p>
                 </div>
                 {% endfor %}
             </div>
-        </div>
         {% endif %}
-
-    </div> <!-- End Row -->
-</div> <!-- End Container -->
-
+        </main>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // NAVBAR TRANSPARENCY
-    window.addEventListener('scroll', function () {
-        const nav = document.querySelector('.navbar');
-        if (nav) {
-            if (window.scrollY > 50) {
-                nav.classList.add('bg-dark', 'shadow-lg');
-                nav.classList.remove('bg-transparent');
-            } else {
-                nav.classList.add('bg-transparent');
-                nav.classList.remove('bg-dark', 'shadow-lg');
-            }
+(function() {
+    // ===== HERO CAROUSEL =====
+    const hero = document.getElementById('hero');
+    if (hero) {
+        const slides = hero.querySelectorAll('.hero-slide');
+        const dots = hero.querySelectorAll('.hero-dot');
+        const prevBtn = document.getElementById('heroPrev');
+        const nextBtn = document.getElementById('heroNext');
+        let current = 0;
+        let timer;
+
+        function go(idx) {
+            slides[current].classList.remove('active');
+            dots[current].classList.remove('active');
+            current = (idx + slides.length) % slides.length;
+            slides[current].classList.add('active');
+            dots[current].classList.add('active');
         }
+
+        function autoPlay() {
+            clearInterval(timer);
+            if (slides.length > 1) timer = setInterval(() => go(current + 1), 7000);
+        }
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => { go(parseInt(dot.dataset.idx)); autoPlay(); });
+        });
+
+        if (prevBtn) prevBtn.addEventListener('click', () => { go(current - 1); autoPlay(); });
+        if (nextBtn) nextBtn.addEventListener('click', () => { go(current + 1); autoPlay(); });
+
+        // Klavye ok tuşları (sadece hero görünür alanda)
+        document.addEventListener('keydown', (e) => {
+            const rect = hero.getBoundingClientRect();
+            if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'ArrowLeft')  { go(current - 1); autoPlay(); }
+            if (e.key === 'ArrowRight') { go(current + 1); autoPlay(); }
+        });
+
+        // Touch swipe
+        let touchStartX = 0;
+        hero.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+        hero.addEventListener('touchend', (e) => {
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) > 50) { go(current + (dx < 0 ? 1 : -1)); autoPlay(); }
+        });
+
+        autoPlay();
+        hero.addEventListener('mouseenter', () => clearInterval(timer));
+        hero.addEventListener('mouseleave', autoPlay);
+    }
+
+    // ===== ROW SCROLLER BUTTONS =====
+    document.querySelectorAll('.scroll-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = document.getElementById(btn.dataset.target);
+            if (!target) return;
+            const dir = btn.classList.contains('next') ? 1 : -1;
+            const w = target.clientWidth * 0.85;
+            target.scrollBy({ left: dir * w, behavior: 'smooth' });
+        });
     });
+})();
 </script>
 {% endblock %}

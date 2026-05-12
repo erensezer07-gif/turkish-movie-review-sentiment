@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}500 — Sunucu Hatası{% endblock %}
+
+{% block content %}
+<div class="container-xl" style="padding: 80px 0;">
+    <div class="text-center mx-auto" style="max-width: 480px;">
+        <div style="font-family:'Manrope',sans-serif;font-weight:900;font-size:8rem;line-height:1;letter-spacing:-0.05em;
+                    background:linear-gradient(135deg, #ef4444, #ff9500);
+                    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">
+            500
+        </div>
+
+        <h1 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.6rem;margin:8px 0 12px;letter-spacing:-0.02em;">
+            Bir şeyler ters gitti
+        </h1>
+
+        <p class="text-dim" style="font-size:0.95rem;margin-bottom:32px;">
+            Sunucuda beklenmedik bir hata oluştu.
+            Birkaç dakika sonra tekrar dener misin?
+        </p>
+
+        <a href="/" class="nav-btn nav-btn-primary"
+            style="padding:11px 22px;font-size:0.92rem;">
+            <i class="fa-solid fa-rotate"></i> Tekrar Dene
+        </a>
+    </div>
+</div>
+{% endblock %}

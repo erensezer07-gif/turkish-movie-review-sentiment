@@ -133,8 +133,7 @@ threadpoolctl==3.6.0
 # via scikit-learn
 tokenizers==0.22.2
 # via transformers
-torch==2.10.0
-# via -r requirements.in
+# torch CPU-only sürümü render_build.sh tarafından ayrı index'ten kurulur.
 tqdm==4.67.3
 # via
 #   gdown

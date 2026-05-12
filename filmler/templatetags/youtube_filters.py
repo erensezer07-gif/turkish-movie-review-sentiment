@@ -2,6 +2,15 @@ from django import template
 
 register = template.Library()
 
+
+@register.filter(name='split_by')
+def split_by(value, sep=","):
+    """Stringi separator ile bölüp temizlenmiş liste döner."""
+    if not value:
+        return []
+    return [s.strip() for s in str(value).split(sep) if s.strip()]
+
+
 @register.filter(name='convert_to_embed')
 def convert_to_embed(value):
     """

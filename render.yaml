@@ -1,11 +1,26 @@
 services:
   - type: web
     name: turkish-movie-review-sentiment
-    env: python
+    runtime: python
+    plan: free
     buildCommand: "bash scripts/render_build.sh"
-      startCommand: "bash start.sh"
-      envVars:
-        - key: PYTHON_VERSION
-          value: "3.11.9"
-        - key: DISABLE_WARMUP
-          value: "1"
+    startCommand: "bash start.sh"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # Render Free Tier'da 512MB RAM var; warmup'ı kapalı tutuyoruz,
+      # ilk istekte modeli lazy-load eder.
+      - key: DISABLE_WARMUP
+        value: "1"
+      # Production: zorunlu olarak False
+      - key: DEBUG
+        value: "False"
+      # Aşağıdaki değerleri Render Dashboard → Environment sekmesinden ayarla:
+      #   SECRET_KEY     (sync: false → her seferinde göstermesin)
+      #   TMDB_API_KEY
+      #   ALLOWED_HOSTS  (Render otomatik ekler ama açıkça yazabilirsin)
+      #   DJANGO_SUPERUSER_USERNAME / EMAIL / PASSWORD (opsiyonel)
+      - key: SECRET_KEY
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false

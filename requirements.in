@@ -1,18 +1,18 @@
-# Framework
+# Web Framework
 Django>=5.0,<6.0
-python-decouple
-requests
 gunicorn
 whitenoise
+python-decouple
+requests
 
-# Data Science & AI
-# Torch CPU version
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch>=2.10.0
+# AI / ML
+# NOT: torch'un CPU-only versiyonu render_build.sh içinde ayrı index'ten
+# (https://download.pytorch.org/whl/cpu) kurulur — bu dosyada tutulmaz.
 transformers
 scikit-learn
 joblib
 numpy
 pandas
-gdown
 
+# Model dağıtım
+gdown

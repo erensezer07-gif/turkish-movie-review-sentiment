@@ -109,14 +109,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # --------------------------------------------------------
 TMDB_API_KEY = config("TMDB_API_KEY", default="")
 
-# ✅ YAPAY ZEKA SERVİSİ (Django -> FastAPI)
-# Modlar: 'direct' (Doğrudan çalıştır), 'api' (Harici servise istek at)
-AI_MODE = config("AI_MODE", default="direct")
-
-# Buraya /analiz yazma. Base URL olsun.
-AI_API_URL = "http://127.0.0.1:8001"
-AI_API_TIMEOUT = 10
-
 # --------------------------------------------------------
 # DİL VE ZAMAN
 # --------------------------------------------------------

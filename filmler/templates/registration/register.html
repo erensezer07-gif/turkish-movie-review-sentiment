@@ -1,22 +1,57 @@
 {% extends 'base.html' %}
+
+{% block title %}Kayıt Ol — SEZER FILM{% endblock %}
+
 {% block content %}
 <div class="auth-fullscreen">
     <div class="auth-card">
-        <h2 class="text-warning fw-bold mb-4">YENİ HESAP OLUŞTUR</h2>
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center gap-2 mb-3">
+                <span class="brand-mark">S</span>
+                <span style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.4rem;letter-spacing:-0.02em;">
+                    SEZER<span class="accent">FILM</span>
+                </span>
+            </div>
+            <h1 style="font-family:'Manrope',sans-serif;font-weight:800;font-size:1.6rem;margin:0 0 8px;letter-spacing:-0.02em;">
+                Aramıza katıl
+            </h1>
+            <p class="text-dim" style="font-size:0.92rem;margin:0;">
+                Yorum yapmak ve AI analizini görmek için ücretsiz kaydol.
+            </p>
+        </div>
+
         <form method="post">
             {% csrf_token %}
+
             {% for field in form %}
-                <div class="mb-3 text-start">
-                    <label class="auth-label">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <small class="text-danger d-block mt-1">{{ field.errors.0 }}</small>
-                    {% endif %}
-                </div>
+            <div class="mb-3 text-start">
+                <label class="auth-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <small class="text-muted-2 d-block mt-1" style="font-size:0.75rem;">{{ field.help_text|safe }}</small>
+                {% endif %}
+                {% if field.errors %}
+                <small style="color:var(--danger);display:block;margin-top:6px;font-size:0.8rem;">
+                    <i class="fa-solid fa-circle-exclamation me-1"></i>{{ field.errors.0 }}
+                </small>
+                {% endif %}
+            </div>
             {% endfor %}
-            <button type="submit" class="btn btn-warning w-100 py-3 fw-bold mt-3 rounded-pill">KAYDI TAMAMLA</button>
+
+            <button type="submit" class="nav-btn nav-btn-primary w-100 justify-content-center mt-2"
+                style="padding:12px;font-size:0.95rem;">
+                <i class="fa-solid fa-user-plus"></i> Hesap Oluştur
+            </button>
         </form>
-        <p class="mt-4 small text-white-50 text-center">Zaten hesabın var mı? <a href="{% url 'login' %}" class="text-warning fw-bold text-decoration-none">Giriş Yap</a></p>
+
+        <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line);text-align:center;">
+            <p class="text-dim" style="font-size:0.88rem;margin:0;">
+                Zaten hesabın var mı?
+                <a href="{% url 'login' %}" class="accent" style="text-decoration:none;font-weight:600;margin-left:4px;">
+                    Giriş yap
+                </a>
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}

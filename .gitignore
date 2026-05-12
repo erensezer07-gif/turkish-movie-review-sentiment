@@ -1,33 +1,56 @@
-# Ortam ve Gizli Dosyalar
+# Sırlar & ortam
 .env
+.env.local
+.env.*.local
+
+# Python
 .venv/
 venv/
+env/
 *.pyc
+*.pyo
+*.pyd
 __pycache__/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Veritabanı
+# Django
 db.sqlite3
+db.sqlite3-journal
+staticfiles/
+media/
+*.log
+
+# AI modelleri / büyük binary
+*.zip
+*.tar.gz
+*.bin
+*.safetensors
+benim_bert_modelim_3cls/
+benim_bert_modelim_3cls_v2/
+yapay_zeka_servisi/bert_model.zip
+
+# TF-IDF küçük olduğu için repo'ya dahil — istisna
+!yapay_zeka_servisi/film_tfidf_3cls.pkl
+
+# Veri setleri / yedekler
+Eski_Yedekler/
+*.parquet
+*.csv.gz
+
+# Diğer
+ngrok.exe
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # IDE
 .idea/
 .vscode/
+*.swp
+*~
 
-# Model Dosyaları (Büyük)
-*.zip
-*.pkl
-benim_bert_modelim_3cls/
-
-# Ngrok
-ngrok.exe
-
-# OS
-Thumbs.db
-.DS_Store
-
-# Backups & Large Files
-Eski_Yedekler/
-media/
-benim_bert_modelim_3cls_v2/
-*.log
-
-!yapay_zeka_servisi/film_tfidf_3cls.pkl
+# Streamlit
+.streamlit/

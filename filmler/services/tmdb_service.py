@@ -31,7 +31,7 @@ def fetch_movie_details(movie_name: str, existing_trailer_url: str = None):
             search_res = requests.get(
                 "https://api.themoviedb.org/3/search/movie",
                 params={"api_key": TMDB_API_KEY, "language": "tr-TR", "query": movie_name},
-                timeout=3,
+                timeout=5,
             ).json()
 
             if search_res.get("results"):
@@ -44,7 +44,7 @@ def fetch_movie_details(movie_name: str, existing_trailer_url: str = None):
                         "language": "tr-TR",
                         "append_to_response": "credits,images,videos"
                     },
-                    timeout=3,
+                    timeout=5,
                 ).json()
 
                 runtime = detay.get("runtime")

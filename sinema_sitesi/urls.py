@@ -1,12 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from filmler.views import anasayfa, film_detay, toplu_film_ekle, kayit_ol, live_search
+from filmler.views import anasayfa, film_detay, kayit_ol, live_search
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', anasayfa, name='anasayfa'),
-    path('yukle/', toplu_film_ekle, name='toplu_film_ekle'),
     path('film/<int:film_id>/', film_detay, name='film_detay'),
     path('register/', kayit_ol, name='register'),
     path('live-search/', live_search, name='live_search'),
