@@ -24,6 +24,20 @@
 
 ---
 
+---
+
+## 📸 Uygulama Ekran Görüntüleri
+
+| Netflix Tarzı Ana Sayfa | Film Detay & Fragman | AI Duygu Analizi & Yorumlar |
+| :---: | :---: | :---: |
+| ![Ana Sayfa](screenshots/anasayfa.png) | ![Film Detay](screenshots/detay.png) | ![Yorum Analizi](screenshots/yorumlar.png) |
+
+| AI Analiz Dashboard (Streamlit) | Spam & Küfür Guardrail | Kullanıcı Girişi |
+| :---: | :---: | :---: |
+| ![AI Dashboard](screenshots/ai_dashboard.png) | ![Spam Koruması](screenshots/spam.png) | ![Giriş Ekranı](screenshots/giris.png) |
+
+---
+
 ## ✨ Özellikler
 
 - **🧠 Hibrit duygu analizi** — Fine-tuned BERT + TF-IDF/Logistic Regression + kural tabanlı guardrail'ler
@@ -97,8 +111,8 @@ flowchart LR
 ### 1. Repo'yu klonla
 
 ```bash
-git clone https://github.com/<username>/<repo>.git
-cd <repo>
+git clone https://github.com/erensezer07-gif/turkish-movie-review-sentiment.git
+cd turkish-movie-review-sentiment
 ```
 
 ### 2. Sanal ortam + bağımlılıklar
